@@ -7,9 +7,39 @@
 | 0: Shared Foundation | ✅ Completed | models, llm, vector, db |
 | 1: Infrastructure | ✅ Completed | foundation, schema, gitops |
 | 2: Three Services | ✅ Completed | agent-smith, bridge, portal |
-| 3: Tests + Hardening | ❌ Not started | qa, shield |
+| 3: Tests + Hardening | ✅ Completed | qa, shield |
 
 ## Last Completed Wave
+
+**Wave 3 — Tests + Hardening** (2 parallel agents):
+
+### Agent `qa` — tests/ (229 passed, 8 skipped, 0 failed)
+- `tests/conftest.py` — fixtures for all services (mock DB, mock LLM, TestClients)
+- `tests/test_models.py` — 44 tests: enums, schemas, SQLAlchemy models
+- `tests/test_llm.py` — 17 tests: LLMService, EmbeddingService, diskcache
+- `tests/test_vector.py` — 15 tests: VectorStore schemas + operations
+- `tests/test_db_pg.py` — 35 tests: PostgresRepository full CRUD
+- `tests/test_db_neo4j.py` — 17 tests: Neo4jRepository graph ops
+- `tests/test_agent_api.py` — 39 tests: Research Agent HTTP API
+- `tests/test_bridge_api.py` — 13 tests: Chat Import Bridge HTTP API
+- `tests/test_portal_api.py` — 7 tests: Research Portal HTTP API
+- `tests/test_safety_gates.py` — 9 tests: safety gate enforcement
+- `tests/test_extraction_service.py` — 8 tests: extraction pipeline
+- `tests/test_quality_service.py` — 7 tests: quality scoring
+
+### Agent `shield` — tools/, scripts/, docs/
+- `tools/extract.py` — CLI: trigger extraction on sources
+- `tools/query.py` — CLI: search projects/sources/entities/claims
+- `tools/export.py` — CLI: export source as Markdown/JSON
+- `tools/__main__.py` — `python -m tools` entry point
+- `docs/CLI.md` — CLI reference documentation
+- `docs/OPERATIONS.md` — updated with CLI, env vars, logging
+- `docs/TROUBLESHOOTING.md` — updated with common issues
+- `scripts/doctor.sh` — updated with more validation checks
+- `scripts/check-health.sh` — updated with PG/Neo4j health checks
+- `backup_checklist.md` — pre-destructive-op verification checklist
+
+---
 
 **Wave 2 — Three Services** (3 parallel agents):
 
@@ -148,4 +178,10 @@
 
 ## Next Action
 
-Start Wave 3: Build tests (qa) and hardening (shield) — unit/integration/E2E tests, CLI tools, backup/restore finalization.
+Build complete. All 4 waves finished. Ready for deployment:
+1. `cp config/.env.example .env` — configure env vars
+2. `docker compose -f docker/docker-compose.yml up -d` — start PG + Neo4j
+3. `source .venv/bin/activate && alembic upgrade head` — run migrations
+4. `uvicorn research_agent.app.main:app --port 8099` — start Agent
+5. `uvicorn chat_import_bridge.app.main:app --port 3022` — start Bridge
+6. `uvicorn research_portal.app.main:app --port 3010` — start Portal

@@ -22,6 +22,36 @@ check_url "Research Agent" "http://127.0.0.1:8099/health"
 check_url "Chat Import Bridge" "http://127.0.0.1:3022/health"
 check_url "Research Portal" "http://127.0.0.1:3010/health"
 
+echo ""
+echo "== Database connectivity =="
+
+if command -v psql >/dev/null 2>&1; then
+  if PGPASSWORD="${POSTGRES_PASSWORD:-northstar}" psql \
+    -h "${POSTGRES_HOST:-127.0.0.1}" \
+    -p "${POSTGRES_PORT:-5432}" \
+    -U "${POSTGRES_USER:-northstar}" \
+    -d "${POSTGRES_DB:-northstar}" \
+    -c "SELECT 1" >/dev/null 2>&1; then
+    echo "ok   PostgreSQL reachable"
+  else
+    echo "FAIL PostgreSQL not reachable"
+    fail=1
+  fi
+else
+  echo "WARN psql not installed — skipping PostgreSQL check"
+fi
+
+if command -v curl >/dev/null 2>&1; then
+  if curl -fsS --max-time 5 http://127.0.0.1:7687/ >/dev/null 2>&1 || \
+     curl -fsS --max-time 5 http://127.0.0.1:7474/ >/dev/null 2>&1; then
+    echo "ok   Neo4j reachable (HTTP bolt/UI port)"
+  else
+    echo "FAIL Neo4j not reachable on ports 7687 or 7474"
+    fail=1
+  fi
+fi
+
+echo ""
 echo "---"
 if [ "$fail" -eq 0 ]; then
   echo "All services healthy."

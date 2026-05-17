@@ -70,6 +70,41 @@ else
   echo "WARN Ollama not reachable (optional, start manually if needed)"
 fi
 
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+check_file() {
+  if [ -f "$1" ]; then
+    printf 'ok   file %s\n' "$1"
+  else
+    printf 'MISS file %s\n' "$1"
+    fail=1
+  fi
+}
+
+check_file "$ROOT/apps/research-agent/pyproject.toml"
+check_file "$ROOT/apps/chat-import-bridge/pyproject.toml"
+check_file "$ROOT/apps/research-portal/pyproject.toml"
+
+check_file "$ROOT/apps/research-agent/research_agent/main.py"
+check_file "$ROOT/apps/chat-import-bridge/chat_import_bridge/main.py"
+check_file "$ROOT/apps/research-portal/research_portal/main.py"
+
+for tmpl in base.html dashboard.html extraction.html quality.html cleanup.html graph_viewer.html; do
+  check_file "$ROOT/apps/research-portal/research_portal/templates/$tmpl"
+done
+
+check_file "$ROOT/apps/research-agent/migrations/alembic.ini"
+check_file "$ROOT/apps/research-agent/migrations/env.py"
+
+if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+  if docker compose -f "$ROOT/docker/docker-compose.yml" config --quiet 2>/dev/null; then
+    echo "ok   docker compose config valid"
+  else
+    echo "FAIL docker compose config invalid"
+    fail=1
+  fi
+fi
+
 echo "---"
 if [ "$fail" -eq 0 ]; then
   echo "All critical checks passed."
