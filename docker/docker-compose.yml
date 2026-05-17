@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: northstar-pg
+    environment:
+      POSTGRES_DB: northstar
+      POSTGRES_USER: northstar
+      POSTGRES_PASSWORD: northstar
+    ports:
+      - "5432:5432"
+    volumes:
+      - northstar-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U northstar -d northstar"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: northstar-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/northstar
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+    volumes:
+      - northstar-neo4j-data:/data
+
+volumes:
+  northstar-pg-data:
+  northstar-neo4j-data:

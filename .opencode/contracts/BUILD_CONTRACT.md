@@ -5,11 +5,43 @@
 | Wave | Status | Agents |
 |---|---|---|
 | 0: Shared Foundation | ✅ Completed | models, llm, vector, db |
-| 1: Infrastructure | ❌ Not started | foundation, schema, gitops |
+| 1: Infrastructure | ✅ Completed | foundation, schema, gitops |
 | 2: Three Services | ❌ Not started | agent-smith, bridge, portal |
 | 3: Tests + Hardening | ❌ Not started | qa, shield |
 
 ## Last Completed Wave
+
+**Wave 1 — Infrastructure** (3 parallel agents):
+
+### Agent `foundation` — docker/, config/, scripts/, systemd/
+- `docker/docker-compose.yml` — PG 16 + Neo4j 5 containers
+- `config/.env.example` — all 18 env vars (PG, Neo4j, Ollama, Chroma, safety flags)
+- `scripts/doctor.sh` — preflight checks (deps, .venv, Ollama, 4 packages)
+- `scripts/check-health.sh` — pings 3 service /health endpoints
+- `scripts/backup.sh` — pg_dump + Chroma dir → timestamped tar.gz
+- `scripts/restore.sh` — pg_restore + Chroma dir from backup
+- `systemd/user/phase1-daily-use.service` — docker compose oneshot
+- `systemd/user/research-portal-native.service` — native uvicorn service
+- Removed obsolete `.example` stub files
+
+### Agent `schema` — apps/research-agent/migrations/, sql/
+- `migrations/alembic.ini` — Alembic config (async PG target)
+- `migrations/env.py` — async Alembic env (northstar_models metadata)
+- `migrations/script.py.mako` — migration template
+- `migrations/versions/001_initial_schema.py` — 7 tables with FKs + JSONB
+- `sql/init.sql` — bootstrap database + user
+- `sql/seed.sql` — sample data (2 projects, 1 source)
+- `sql/README.md` — migration usage docs
+
+### Agent `gitops` — Dockerfile, app pyproject.toml files, CI, Makefile
+- `Dockerfile` — multi-stage (agent:8099, bridge:3022, portal:3010)
+- `apps/research-agent/pyproject.toml`
+- `apps/chat-import-bridge/pyproject.toml`
+- `apps/research-portal/pyproject.toml`
+- `.github/workflows/ci.yml` — lint (ruff), test (pytest + PG/Neo4j services), docker-compose config check
+- `Makefile` — install, install-all, test, lint (ruff), tree targets
+
+---
 
 **Wave 0 — Shared Foundation** (4 parallel agents):
 
@@ -66,4 +98,4 @@
 
 ## Next Action
 
-Start Wave 1: Build infrastructure (docker-compose, .env, migrations, Dockerfiles, CI, Makefile targets).
+Start Wave 2: Build three microservices — Research Agent (:8099), Chat Import Bridge (:3022), Research Portal (:3010).

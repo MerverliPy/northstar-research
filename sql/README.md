@@ -1,10 +1,12 @@
-# SQL
+# SQL Scripts
 
-Place reviewed schema migrations and database documentation here.
+- `init.sql` — Create database and user (run once as postgres superuser)
+- `seed.sql` — Sample data for development
 
-Rules:
+## Usage
 
-- Never commit database dumps.
-- Prefer timestamped migrations.
-- Include rollback notes when possible.
-- Keep destructive migrations opt-in and backup-aware.
+```
+psql -U postgres -f sql/init.sql
+alembic upgrade head
+psql -U northstar -d northstar -f sql/seed.sql
+```

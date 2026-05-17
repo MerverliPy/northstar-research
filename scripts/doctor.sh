@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "== Northstar Research repository doctor =="
+echo "== Northstar Research doctor =="
+
+fail=0
 
 need() {
   if command -v "$1" >/dev/null 2>&1; then
     printf 'ok   %s\n' "$1"
   else
-    printf 'miss %s\n' "$1"
+    printf 'MISS %s\n' "$1"
+    fail=1
   fi
 }
 
@@ -17,11 +20,60 @@ need curl
 need docker
 
 if command -v docker >/dev/null 2>&1; then
-  docker compose version >/dev/null 2>&1 && echo "ok   docker compose" || echo "miss docker compose"
+  if docker compose version >/dev/null 2>&1; then
+    echo "ok   docker compose"
+  else
+    echo "MISS docker compose"
+    fail=1
+  fi
 fi
 
-[ -f .env ] && echo "warn .env exists; verify it is not tracked" || echo "ok   no root .env file"
+if [ -f .env ]; then
+  echo "warn .env exists (make sure it's gitignored)"
+else
+  echo "MISS .env file at repo root"
+  fail=1
+fi
 
-scripts/verify-no-secrets.sh
+if command -v python3 >/dev/null 2>&1; then
+  pyver=$(python3 --version 2>&1 | grep -oP '\d+\.\d+')
+  if awk "BEGIN {exit !($pyver >= 3.11)}"; then
+    echo "ok   python3 ($(python3 --version 2>&1))"
+  else
+    echo "MISS python3 >= 3.11 (found $(python3 --version 2>&1))"
+    fail=1
+  fi
+else
+  echo "MISS python3"
+  fail=1
+fi
 
-echo "Doctor checks completed."
+if [ -d .venv ]; then
+  echo "ok   .venv exists"
+else
+  echo "MISS .venv directory"
+  fail=1
+fi
+
+for pkg in northstar-db northstar-llm northstar-models northstar-vector; do
+  if python3 -c "import $pkg" 2>/dev/null; then
+    printf 'ok   package %s importable\n' "$pkg"
+  else
+    printf 'MISS package %s not importable\n' "$pkg"
+    fail=1
+  fi
+done
+
+if curl -fsS --max-time 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+  echo "ok   Ollama reachable at http://127.0.0.1:11434"
+else
+  echo "WARN Ollama not reachable (optional, start manually if needed)"
+fi
+
+echo "---"
+if [ "$fail" -eq 0 ]; then
+  echo "All critical checks passed."
+else
+  echo "Some critical checks FAILED."
+  exit 1
+fi

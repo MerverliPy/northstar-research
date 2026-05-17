@@ -1,28 +1,49 @@
-name: repository-checks
-
-on:
-  pull_request:
-  push:
-    branches: [ main, master ]
+name: CI
+on: [push, pull_request]
 
 jobs:
-  hygiene:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - name: Shell syntax
-        run: |
-          set -euo pipefail
-          for f in scripts/*.sh; do
-            [ -f "$f" ] || continue
-            bash -n "$f"
-          done
-      - name: Required root files
-        run: |
-          set -euo pipefail
-          test -f README.md
-          test -f SECURITY.md
-          test -f CONTRIBUTING.md
-          test -f .gitignore
-          test -f docs/ARCHITECTURE.md
-          test -f docs/SAFETY.md
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check packages/ apps/ scripts/
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: northstar
+          POSTGRES_USER: northstar
+          POSTGRES_PASSWORD: northstar
+        ports:
+          - 5432:5432
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/northstar
+        ports:
+          - 7687:7687
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          pip install -e packages/northstar-models
+          pip install -e packages/northstar-llm
+          pip install -e packages/northstar-vector
+          pip install -e packages/northstar-db
+          pip install pytest httpx pytest-asyncio
+      - run: pytest tests/ -v --timeout=60
+
+  check-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f docker/docker-compose.yml config

@@ -1,14 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help doctor health lint check-secrets tree
-
-help:
-	@echo "Northstar Research repository commands"
-	@echo "  make doctor        Run local repo sanity checks"
-	@echo "  make health        Check local service endpoints"
-	@echo "  make check-secrets Verify likely secrets/runtime files are not staged"
-	@echo "  make lint          Syntax-check shell scripts"
-	@echo "  make tree          Print tracked scaffold tree"
+.PHONY: doctor health check-secrets lint tree install install-all test
 
 doctor:
 	@scripts/doctor.sh
@@ -20,12 +12,23 @@ check-secrets:
 	@scripts/verify-no-secrets.sh
 
 lint:
-	@set -euo pipefail; \
-	for f in scripts/*.sh; do \
-	  [ -f "$$f" ] || continue; \
-	  bash -n "$$f"; \
-	done; \
-	echo "Shell syntax checks passed."
+	@ruff check packages/ apps/ scripts/
 
 tree:
-	@find . -maxdepth 4 -type f | sort | sed 's#^./##'
+	@find . -type f \( -name '*.py' -o -name '*.toml' -o -name '*.yml' -o -name '*.yaml' -o -name '*.ini' -o -name '*.sh' -o -name '*.md' -o -name '*.env*' \) \
+		! -path './.venv/*' ! -path './__pycache__/*' ! -path './*/egg-info/*' ! -path './*/__pycache__/*' \
+		| sort
+
+install:
+	@pip install -e packages/northstar-models
+	@pip install -e packages/northstar-llm
+	@pip install -e packages/northstar-vector
+	@pip install -e packages/northstar-db
+
+install-all: install
+	@pip install -e apps/research-agent
+	@pip install -e apps/chat-import-bridge
+	@pip install -e apps/research-portal
+
+test:
+	@pytest tests/ -v

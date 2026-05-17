@@ -1,0 +1,12 @@
+[Unit]
+Description=Northstar Research Portal (native uvicorn)
+After=network-online.target northstar-pg.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/northstar-research
+ExecStart=%h/northstar-research/.venv/bin/uvicorn apps.research_portal.app.main:app --host 127.0.0.1 --port 3010
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

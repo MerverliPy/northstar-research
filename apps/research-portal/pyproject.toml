@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "research-portal"
+version = "0.1.0"
+description = "Northstar Research Portal — Jinja2+HTMX dashboards, graph viewer"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.114",
+    "uvicorn>=0.30",
+    "jinja2>=3.1",
+    "aiofiles>=24.0",
+    "pydantic>=2.0",
+    "structlog>=24.0",
+    "northstar-models",
+    "northstar-db",
+]
+
+[tool.setuptools]
+packages = ["research_portal"]
