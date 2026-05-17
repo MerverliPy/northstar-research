@@ -181,7 +181,12 @@
 Build complete. All 4 waves finished. Ready for deployment:
 1. `cp config/.env.example .env` — configure env vars
 2. `docker compose -f docker/docker-compose.yml up -d` — start PG + Neo4j
-3. `source .venv/bin/activate && alembic upgrade head` — run migrations
-4. `uvicorn research_agent.app.main:app --port 8099` — start Agent
-5. `uvicorn chat_import_bridge.app.main:app --port 3022` — start Bridge
-6. `uvicorn research_portal.app.main:app --port 3010` — start Portal
+3. `source .venv/bin/activate && alembic -c apps/research-agent/migrations/alembic.ini upgrade head` — run migrations
+4. `uvicorn research_agent.main:app --reload --port 8099` — start Agent
+5. `uvicorn chat_import_bridge.main:app --reload --port 3022` — start Bridge
+6. `uvicorn research_portal.main:app --reload --port 3010` — start Portal
+
+Things to check before running:
+- Pull Ollama models: `ollama pull qwen3:14b && ollama pull llama3.1:8b && ollama pull nomic-embed-text`
+- First-time users: `source .venv/bin/activate && make install` to install all packages
+- Safety gates default to OFF — set `FORCE_GRAPH_EXTRACTION=true` and/or `ENABLE_DESTRUCTIVE_CLEANUP=true` in `.env` to enable
