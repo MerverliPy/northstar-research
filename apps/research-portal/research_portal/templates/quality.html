@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Quality - Northstar Research{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1.25rem;font-size:1.5rem;">Quality Dashboard</h2>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Source</th>
+        <th>Project</th>
+        <th>Score</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sources %}
+      <tr>
+        <td>{{ s.title[:60] }}{% if s.title|length > 60 %}&hellip;{% endif %}</td>
+        <td>{{ s.project_name }}</td>
+        <td>
+          {% if s.quality_score is not none %}
+            {% if s.quality_score >= 0.7 %}
+              <span class="badge badge-green">{{ "%.2f"|format(s.quality_score) }}</span>
+            {% elif s.quality_score >= 0.4 %}
+              <span class="badge badge-yellow">{{ "%.2f"|format(s.quality_score) }}</span>
+            {% else %}
+              <span class="badge badge-red">{{ "%.2f"|format(s.quality_score) }}</span>
+            {% endif %}
+          {% else %}
+            <span class="badge badge-blue">unscored</span>
+          {% endif %}
+        </td>
+        <td>
+          <button class="btn btn-secondary btn-sm"
+                  hx-post="/quality/score/{{ s.id }}"
+                  hx-target="closest tr"
+                  hx-swap="outerHTML"
+                  hx-trigger="click">
+            Score
+          </button>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="color:#888;">No sources found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

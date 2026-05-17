@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Graph Viewer - Northstar Research{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1.25rem;font-size:1.5rem;">Graph Viewer</h2>
+
+<div style="margin-bottom:1rem;display:flex;align-items:center;gap:1rem;">
+  <label for="project-select" style="font-weight:600;">Project:</label>
+  <select id="project-select" @change="loadGraph">
+    <option value="">-- Select a project --</option>
+    {% for p in projects %}
+    <option value="{{ p.id }}">{{ p.name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div id="graph-container"></div>
+{% endblock %}
+{% block scripts %}
+<script>
+  let network = null;
+  const container = document.getElementById('graph-container');
+
+  function loadGraph() {
+    const projectId = document.getElementById('project-select').value;
+    if (!projectId) return;
+
+    fetch('/graph/data/' + projectId)
+      .then(r => r.json())
+      .then(data => {
+        const nodes = new vis.DataSet(data.nodes.map(n => ({
+          id: n.id,
+          label: n.label,
+          group: n.group,
+        })));
+        const edges = new vis.DataSet(data.edges.map(e => ({
+          from: e.from,
+          to: e.to,
+          label: e.label,
+          arrows: 'to',
+        })));
+
+        const options = {
+          nodes: {
+            shape: 'dot',
+            size: 16,
+            font: { size: 12, face: 'sans-serif' },
+            borderWidth: 2,
+          },
+          edges: {
+            font: { size: 10, align: 'middle' },
+            width: 1.5,
+            smooth: { type: 'continuous' },
+          },
+          physics: {
+            stabilization: { iterations: 100 },
+            solver: 'forceAtlas2Based',
+          },
+          groups: {
+            source: { color: { background: '#e94560', border: '#c7304f' } },
+            person: { color: { background: '#0f3460', border: '#0a2647' } },
+            organization: { color: { background: '#16a085', border: '#0d7a66' } },
+            concept: { color: { background: '#8e44ad', border: '#6c3483' } },
+            technology: { color: { background: '#2980b9', border: '#1a5276' } },
+            location: { color: { background: '#27ae60', border: '#1e8449' } },
+            event: { color: { background: '#f39c12', border: '#d68910' } },
+            product: { color: { background: '#e67e22', border: '#ca6f1e' } },
+            document: { color: { background: '#7f8c8d', border: '#616a6b' } },
+            entity: { color: { background: '#3498db', border: '#2471a3' } },
+          },
+        };
+
+        if (network) network.destroy();
+        network = new vis.Network(container, { nodes, edges }, options);
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('project-select');
+    if (select) {
+      select.addEventListener('change', loadGraph);
+    }
+  });
+</script>
+{% endblock %}

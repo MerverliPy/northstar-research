@@ -6,10 +6,60 @@
 |---|---|---|
 | 0: Shared Foundation | ✅ Completed | models, llm, vector, db |
 | 1: Infrastructure | ✅ Completed | foundation, schema, gitops |
-| 2: Three Services | ❌ Not started | agent-smith, bridge, portal |
+| 2: Three Services | ✅ Completed | agent-smith, bridge, portal |
 | 3: Tests + Hardening | ❌ Not started | qa, shield |
 
 ## Last Completed Wave
+
+**Wave 2 — Three Services** (3 parallel agents):
+
+### Agent `agent-smith` — apps/research-agent/ (port 8099)
+- `research_agent/main.py` — FastAPI app, lifespan, CORS, /health
+- `research_agent/config.py` — Settings with safety flags
+- `research_agent/dependencies.py` — DI singletons (PG, Neo4j, LLM, Vector)
+- `research_agent/routers/projects.py` — CRUD /api/v1/projects
+- `research_agent/routers/sources.py` — CRUD /api/v1/sources
+- `research_agent/routers/entities.py` — CRUD /api/v1/entities
+- `research_agent/routers/claims.py` — CRUD /api/v1/claims
+- `research_agent/routers/reports.py` — CRUD /api/v1/reports
+- `research_agent/routers/extraction.py` — POST /extract, GET /status, GET /queue (403 unless force)
+- `research_agent/routers/quality.py` — POST /score, GET /history
+- `research_agent/routers/cleanup.py` — GET /report (dry-run), POST /execute (403 unless flag)
+- `research_agent/routers/search.py` — POST / vector search
+- `research_agent/services/extraction.py` — LLM→entities→PG→Neo4j→Chroma pipeline
+- `research_agent/services/quality.py` — LLM scoring → Analysis record
+- pyproject.toml updated with pydantic-settings, httpx
+
+### Agent `bridge` — apps/chat-import-bridge/ (port 3022)
+- `chat_import_bridge/main.py` — FastAPI app, lifespan, CORS, /health
+- `chat_import_bridge/config.py` — Settings (staging DB path, Agent URL)
+- `chat_import_bridge/models.py` — StagedImport SQLAlchemy model
+- `chat_import_bridge/database.py` — staging DB engine + sessions
+- `chat_import_bridge/routers/imports.py` — POST /paste, GET /, GET/{id}, DELETE/{id}
+- `chat_import_bridge/routers/export.py` — GET /{id}/markdown
+- `chat_import_bridge/routers/promotion.py` — POST /{id}, POST /batch
+- `chat_import_bridge/services/staging_db.py` — engine + session factory (aiosqlite)
+- `chat_import_bridge/services/staging.py` — staging CRUD operations
+- `chat_import_bridge/services/export.py` — to_markdown formatter
+- `chat_import_bridge/services/promotion.py` — httpx POST to Agent API
+
+### Agent `portal` — apps/research-portal/ (port 3010)
+- `research_portal/main.py` — FastAPI app, lifespan, Jinja2 templates, /health
+- `research_portal/config.py` — Settings
+- `research_portal/dependencies.py` — PG + Neo4j repo DI
+- `research_portal/routers/dashboard.py` — GET / — stats + recent projects
+- `research_portal/routers/quality.py` — GET/POST /quality — scores + HTMX trigger
+- `research_portal/routers/cleanup.py` — GET/POST /cleanup — dry-run, 403 unless flag
+- `research_portal/routers/extraction.py` — GET/POST /extraction — 403 unless force
+- `research_portal/routers/visual.py` — GET /graph, GET /graph/data/{id} — vis.js JSON
+- `templates/base.html` — nav (5 links), HTMX+Alpine+vis.js CDN, clean CSS
+- `templates/dashboard.html` — 4 stat cards + projects table
+- `templates/quality.html` — sources w/ color-coded scores
+- `templates/cleanup.html` — report + disabled Execute button
+- `templates/extraction.html` — source table w/ status badges
+- `templates/graph_viewer.html` — project dropdown + vis.js network
+
+---
 
 **Wave 1 — Infrastructure** (3 parallel agents):
 
@@ -98,4 +148,4 @@
 
 ## Next Action
 
-Start Wave 2: Build three microservices — Research Agent (:8099), Chat Import Bridge (:3022), Research Portal (:3010).
+Start Wave 3: Build tests (qa) and hardening (shield) — unit/integration/E2E tests, CLI tools, backup/restore finalization.

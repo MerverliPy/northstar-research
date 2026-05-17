@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Cleanup - Northstar Research{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1.25rem;font-size:1.5rem;">Cleanup Dashboard</h2>
+
+{% if not enable_destructive_cleanup %}
+<div class="alert alert-warning">
+  <strong>Read-Only Mode.</strong> Destructive cleanup is disabled.
+  Set <code>ENABLE_DESTRUCTIVE_CLEANUP=true</code> to enable cleanup execution.
+</div>
+{% endif %}
+
+<div class="card-grid">
+  <div class="card">
+    <h3>Projects</h3>
+    <div class="value">{{ report.projects_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Sources</h3>
+    <div class="value">{{ report.sources_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Entities</h3>
+    <div class="value">{{ report.entities_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Relationships</h3>
+    <div class="value">{{ report.relationships_count }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <p style="margin-bottom:1rem;">{{ report.summary }}</p>
+  <button class="btn btn-primary"
+          hx-post="/cleanup/execute"
+          hx-target="body"
+          hx-swap="beforeend"
+          hx-trigger="click"
+          {% if not enable_destructive_cleanup %}disabled{% endif %}>
+    Execute Cleanup
+  </button>
+</div>
+{% endblock %}

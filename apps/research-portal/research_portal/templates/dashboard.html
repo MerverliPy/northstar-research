@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Northstar Research{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1.25rem;font-size:1.5rem;">Dashboard</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h3>Projects</h3>
+    <div class="value">{{ project_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Sources</h3>
+    <div class="value">{{ source_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Entities</h3>
+    <div class="value">{{ entity_count }}</div>
+  </div>
+  <div class="card">
+    <h3>Claims</h3>
+    <div class="value">{{ claim_count }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:1rem;">Recent Projects</h3>
+  {% if recent_projects %}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in recent_projects %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td><span class="badge badge-blue">{{ p.status }}</span></td>
+        <td>{{ p.created_at[:10] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#888;">No projects yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+research_portal/__init__.py
+research_portal/config.py
+research_portal/dependencies.py
+research_portal/main.py
+research_portal.egg-info/PKG-INFO
+research_portal.egg-info/SOURCES.txt
+research_portal.egg-info/dependency_links.txt
+research_portal.egg-info/requires.txt
+research_portal.egg-info/top_level.txt

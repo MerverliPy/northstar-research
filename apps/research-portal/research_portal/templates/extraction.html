@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Extraction - Northstar Research{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1.25rem;font-size:1.5rem;">Extraction Gate</h2>
+
+{% if not force_graph_extraction %}
+<div class="alert alert-warning">
+  <strong>Extraction Disabled.</strong> Set <code>FORCE_GRAPH_EXTRACTION=true</code> to enable graph extraction.
+</div>
+{% endif %}
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Source</th>
+        <th>Project</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in pending_sources %}
+      <tr>
+        <td>{{ s.title[:60] }}{% if s.title|length > 60 %}&hellip;{% endif %}</td>
+        <td>{{ s.project_name }}</td>
+        <td>
+          {% if s.status == 'completed' %}
+            <span class="badge badge-green">completed</span>
+          {% elif s.status == 'failed' %}
+            <span class="badge badge-red">failed</span>
+          {% elif s.status == 'in_progress' %}
+            <span class="badge badge-yellow">in progress</span>
+          {% else %}
+            <span class="badge badge-blue">{{ s.status }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <button class="btn btn-secondary btn-sm"
+                  hx-post="/extraction/trigger/{{ s.id }}"
+                  hx-target="closest tr"
+                  hx-swap="outerHTML"
+                  hx-trigger="click"
+                  {% if not force_graph_extraction %}disabled{% endif %}>
+            Extract
+          </button>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="color:#888;">No sources found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
