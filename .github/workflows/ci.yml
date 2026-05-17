@@ -1,0 +1,28 @@
+name: repository-checks
+
+on:
+  pull_request:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: |
+          set -euo pipefail
+          for f in scripts/*.sh; do
+            [ -f "$f" ] || continue
+            bash -n "$f"
+          done
+      - name: Required root files
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f SECURITY.md
+          test -f CONTRIBUTING.md
+          test -f .gitignore
+          test -f docs/ARCHITECTURE.md
+          test -f docs/SAFETY.md

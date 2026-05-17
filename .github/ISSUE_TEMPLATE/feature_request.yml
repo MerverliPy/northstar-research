@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a safe improvement
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should this change enable?
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety constraints
+      description: How should this preserve manual review, backups, and dry-run behavior?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will this be verified?
