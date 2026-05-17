@@ -1,0 +1,7 @@
+Show current build status for Northstar Research.
+
+Reads contracts/BUILD_CONTRACT.md and shows:
+- Last completed wave
+- Current wave in progress
+- What's left to build
+- Safety flag values

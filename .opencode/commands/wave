@@ -1,0 +1,21 @@
+Run a build wave for Northstar Research.
+
+Usage: /wave <wave-number>
+
+Waves:
+  0 - Shared Foundation (northstar-models, northstar-llm, northstar-vector, northstar-db packages)
+  1 - Infrastructure (docker-compose, .env, migrations, Dockerfiles, CI, Makefile)
+  2 - Three Services (research-agent :8099, research-portal :3010, chat-import-bridge :3022)
+  3 - Tests + Hardening (unit/integration/E2E tests, backup/restore scripts, CLI tools)
+
+Before executing:
+  1. Read contracts/BUILD_CONTRACT.md
+  2. Read BUILD_PLAN.md for the wave details
+  3. Spawn parallel sub-agents per the plan
+  4. After completion, update contracts/BUILD_CONTRACT.md
+
+Examples:
+  /wave 0     - Build shared foundation packages
+  /wave 1     - Build infrastructure
+  /wave 2     - Build all three services
+  /wave 3     - Build tests and hardening
