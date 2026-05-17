@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "northstar-vector"
+version = "0.1.0"
+description = "ChromaDB vector store wrapper with auto-embedding for Northstar Research"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=0.5.0",
+    "pydantic>=2.0",
+    "structlog>=24.0",
+    "northstar-llm",
+]
+
+[tool.setuptools]
+packages = ["northstar_vector"]

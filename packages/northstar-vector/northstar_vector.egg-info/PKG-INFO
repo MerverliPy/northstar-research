@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: northstar-vector
+Version: 0.1.0
+Summary: ChromaDB vector store wrapper with auto-embedding for Northstar Research
+Requires-Python: >=3.11
+Requires-Dist: chromadb>=0.5.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: structlog>=24.0
+Requires-Dist: northstar-llm

@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: northstar-db
+Version: 0.1.0
+Summary: Async PostgreSQL + Neo4j repository pattern for Northstar Research
+Requires-Python: >=3.11
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: asyncpg>=0.29
+Requires-Dist: sqlalchemy[asyncio]
+Requires-Dist: neo4j>=5.20
+Requires-Dist: pydantic>=2.0
+Requires-Dist: structlog>=24.0
+Requires-Dist: northstar-models

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "northstar-models"
+version = "0.1.0"
+description = "Shared Pydantic schemas and SQLAlchemy models for Northstar Research"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "sqlalchemy>=2.0",
+    "uuid>=1.30",
+]
+
+[tool.setuptools]
+packages = ["northstar_models"]

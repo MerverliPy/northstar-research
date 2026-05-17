@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "northstar-db"
+version = "0.1.0"
+description = "Async PostgreSQL + Neo4j repository pattern for Northstar Research"
+requires-python = ">=3.11"
+dependencies = [
+    "sqlalchemy>=2.0",
+    "asyncpg>=0.29",
+    "sqlalchemy[asyncio]",
+    "neo4j>=5.20",
+    "pydantic>=2.0",
+    "structlog>=24.0",
+    "northstar-models",
+]
+
+[tool.setuptools]
+packages = ["northstar_db"]
