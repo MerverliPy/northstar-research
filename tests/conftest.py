@@ -277,9 +277,14 @@ def portal_app(mock_db, mock_neo4j, test_settings):
                 if not tpl_path.exists():
                     tpl_path.write_text(f"<html><body><h1>{tpl}</h1></body></html>")
 
+        http_client = AsyncMock()
+        http_client.request = AsyncMock(return_value=MagicMock(status_code=403, content=b'{"detail":"Forbidden"}', headers={}))
+
         app.state.settings = MagicMock()
         app.state.settings.force_graph_extraction = False
         app.state.settings.enable_destructive_cleanup = False
+        app.state.settings.research_agent_url = "http://127.0.0.1:8099"
+        app.state.http_client = http_client
         yield app
 
 

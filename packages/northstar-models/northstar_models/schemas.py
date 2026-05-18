@@ -2,12 +2,11 @@ import uuid
 from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from northstar_models.enums import (
     EntityType,
     ExtractionStatus,
-    LLMTask,
     ProjectStatus,
     QualityStatus,
 )

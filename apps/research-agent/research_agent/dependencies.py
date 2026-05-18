@@ -1,6 +1,5 @@
 from collections.abc import AsyncGenerator
 
-from fastapi import Depends
 from structlog import get_logger
 
 from northstar_db import Neo4jRepository, PostgresRepository

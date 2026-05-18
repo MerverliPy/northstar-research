@@ -8,7 +8,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from northstar_models.models import CommonModel
-from northstar_models import models
 
 config = context.config
 

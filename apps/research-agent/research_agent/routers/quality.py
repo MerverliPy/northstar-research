@@ -1,10 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 
 from northstar_db import PostgresRepository
 from northstar_llm import LLMService
-from northstar_models import AnalysisRead, QualityScoreRequest, QualityScoreResponse, QualityStatus
+from northstar_models import AnalysisRead, QualityScoreRequest, QualityScoreResponse
 
 from research_agent.dependencies import get_db, get_llm
 from research_agent.services.quality import score_quality

@@ -4,10 +4,9 @@ from fastapi.responses import HTMLResponse
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 
-from northstar_db import PostgresRepository, Neo4jRepository
-from northstar_models.enums import ExtractionStatus
+from northstar_db import PostgresRepository
 
-from research_portal.dependencies import get_db, get_neo4j
+from research_portal.dependencies import get_db
 from research_portal.config import settings
 
 router = APIRouter(tags=["Quality"])

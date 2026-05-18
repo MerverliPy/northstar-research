@@ -1,6 +1,6 @@
 from collections.abc import AsyncGenerator
 
-from fastapi import Depends, Request
+from fastapi import Request
 from structlog import get_logger
 
 from northstar_db import Neo4jRepository, PostgresRepository

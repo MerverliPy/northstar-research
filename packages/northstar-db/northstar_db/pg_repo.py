@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 import structlog
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from northstar_models.base import CommonModel

@@ -30,7 +30,10 @@ class TestForceGraphExtraction:
 
     async def test_portal_extraction_gate_403(self, portal_client):
         sid = uuid.uuid4()
-        response = await portal_client.post(f"/extraction/trigger/{sid}")
+        response = await portal_client.post(
+            "/api/v1/extraction/extract",
+            json={"source_id": str(sid)},
+        )
         assert response.status_code == 403
 
     async def test_portal_extraction_when_force_enabled(self, portal_client):
@@ -56,7 +59,7 @@ class TestDestructiveCleanup:
         assert "dry-run" in report.summary.lower() or "set" in report.summary.lower()
 
     async def test_portal_cleanup_gate_403(self, portal_client):
-        response = await portal_client.post("/cleanup/execute")
+        response = await portal_client.post("/api/v1/cleanup/execute")
         assert response.status_code == 403
 
     async def test_portal_cleanup_when_enabled(self, portal_client):

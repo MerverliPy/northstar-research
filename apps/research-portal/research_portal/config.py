@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     neo4j_password: str = "northstar"
     chroma_persist_dir: str = "~/.cache/northstar/chromadb"
     research_agent_url: str = "http://127.0.0.1:8099"
+    chat_import_bridge_url: str = "http://127.0.0.1:3022"
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    orchestrator_model: str = "qwen3:14b"
+    conversation_db_path: str = "~/.cache/northstar/conversations.db"
+    max_conversation_history: int = 50
     force_graph_extraction: bool = False
     enable_destructive_cleanup: bool = False
     log_level: str = "INFO"

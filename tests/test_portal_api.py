@@ -43,14 +43,17 @@ class TestGraphPage:
 class TestSafetyGates:
     async def test_extraction_trigger_403(self, portal_client):
         sid = uuid.uuid4()
-        response = await portal_client.post(f"/extraction/trigger/{sid}")
+        response = await portal_client.post(
+            "/api/v1/extraction/extract",
+            json={"source_id": str(sid)},
+        )
         assert response.status_code == 403
 
     async def test_extraction_trigger_source_not_found(self, portal_client):
-        pytest.skip("Extraction trigger needs httpx real call to agent")
+        pytest.skip("Extraction trigger needs real backend services")
 
     async def test_cleanup_execute_403(self, portal_client):
-        response = await portal_client.post("/cleanup/execute")
+        response = await portal_client.post("/api/v1/cleanup/execute")
         assert response.status_code == 403
 
 

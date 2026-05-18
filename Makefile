@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: doctor health check-secrets lint tree install install-all test
+.PHONY: doctor health check-secrets lint tree install install-all test portal-dev portal-build
 
 doctor:
 	@scripts/doctor.sh
@@ -32,3 +32,9 @@ install-all: install
 
 test:
 	@pytest tests/ -v
+
+portal-dev:
+	@cd apps/research-portal/research_portal/spa && npm run dev
+
+portal-build:
+	@cd apps/research-portal/research_portal/spa && npm run build

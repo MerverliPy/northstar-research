@@ -6,7 +6,6 @@ from pydantic import BaseModel
 from northstar_db import Neo4jRepository, PostgresRepository
 from northstar_llm import LLMService
 from northstar_models import ClaimCreate, EntityCreate, EntityType, ExtractionStatus
-from northstar_models.models import Source
 from northstar_vector import DocumentChunk, VectorStore
 
 logger = structlog.get_logger(__name__)

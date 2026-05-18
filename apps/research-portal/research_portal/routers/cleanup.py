@@ -1,6 +1,6 @@
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 
