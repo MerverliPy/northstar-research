@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 interface Column<T> {
@@ -5,6 +6,13 @@ interface Column<T> {
   header: string
   render?: (item: T) => ReactNode
   className?: string
+}
+
+type SortDir = 'asc' | 'desc' | null
+
+interface SortState {
+  key: string
+  dir: SortDir
 }
 
 interface TableProps<T> {
@@ -74,12 +82,65 @@ export function Table<T extends Record<string, any>>({
   loadingRows = 5,
   stickyHeader,
 }: TableProps<T>) {
+  const [sort, setSort] = useState<SortState>({ key: '', dir: null })
+
+  const handleSort = (colKey: string) => {
+    setSort((prev) => {
+      if (prev.key !== colKey) return { key: colKey, dir: 'asc' }
+      if (prev.dir === 'asc') return { key: colKey, dir: 'desc' }
+      return { key: '', dir: null }
+    })
+  }
+
+  const sortedData = useMemo(() => {
+    if (!sort.key || !sort.dir) return data
+    const col = columns.find((c) => c.key === sort.key)
+    if (!col) return data
+
+    const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
+
+    return [...data].sort((a, b) => {
+      const aVal = a[sort.key]
+      const bVal = b[sort.key]
+
+      // Handle null/undefined
+      if (aVal == null && bVal == null) return 0
+      if (aVal == null) return 1
+      if (bVal == null) return -1
+
+      // Handle dates (ISO strings or Date objects)
+      const aDate = aVal instanceof Date ? aVal : typeof aVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(aVal) ? new Date(aVal) : null
+      const bDate = bVal instanceof Date ? bVal : typeof bVal === 'string' && /^\d{4}-\d{2}-\d{2}/.test(bVal) ? new Date(bVal) : null
+      if (aDate && bDate && !isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return sort.dir === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime()
+      }
+
+      // Handle numbers
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sort.dir === 'asc' ? aVal - bVal : bVal - aVal
+      }
+
+      // Default: string comparison
+      const aStr = String(aVal)
+      const bStr = String(bVal)
+      const cmp = collator.compare(aStr, bStr)
+      return sort.dir === 'asc' ? cmp : -cmp
+    })
+  }, [data, sort, columns])
+
   const cellValue = (item: T, col: Column<T>): ReactNode => {
     if (col.render) return col.render(item)
     const val = item[col.key]
     if (val === null || val === undefined) return '-'
     if (typeof val === 'object') return JSON.stringify(val)
     return String(val)
+  }
+
+  const sortIndicator = (colKey: string): string => {
+    if (sort.key !== colKey || !sort.dir) return ''
+    return sort.dir === 'asc' ? ' ▲' : ' ▼'
   }
 
   return (
@@ -90,9 +151,27 @@ export function Table<T extends Record<string, any>>({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`text-left px-3 py-2 border-b border-[#2a2a4a] text-xs uppercase tracking-wider text-[#8888aa] font-medium bg-[#16213e] ${col.className || ''}`}
+                className={`text-left px-3 py-2 border-b border-[#2a2a4a] text-xs uppercase tracking-wider text-[#8888aa] font-medium bg-[#16213e] select-none ${col.className || ''} ${
+                  col.key !== '' ? 'cursor-pointer hover:text-[#e0e0e0] hover:bg-[#2a2a4a]/30 transition-colors' : ''
+                } ${sort.key === col.key ? 'text-[#e94560]' : ''}`}
+                onClick={() => {
+                  if (col.key !== '') handleSort(col.key)
+                }}
+                role="columnheader"
+                aria-sort={
+                  sort.key === col.key
+                    ? sort.dir === 'asc'
+                      ? 'ascending'
+                      : sort.dir === 'desc'
+                        ? 'descending'
+                        : 'none'
+                    : 'none'
+                }
               >
                 {col.header}
+                <span className={`inline-block text-[#e94560] ${sort.key === col.key ? '' : 'invisible'}`}>
+                  {sortIndicator(col.key)}
+                </span>
               </th>
             ))}
           </tr>
@@ -102,10 +181,10 @@ export function Table<T extends Record<string, any>>({
             Array.from({ length: loadingRows }).map((_, i) => (
               <SkeletonRow key={i} columns={columns.length} />
             ))
-          ) : data.length === 0 ? (
+          ) : sortedData.length === 0 ? (
             <EmptyState message={emptyMessage} action={emptyAction} />
           ) : (
-            data.map((item) => (
+            sortedData.map((item) => (
               <tr
                 key={String(item[keyField])}
                 className={`border-b border-[#2a2a4a]/50 transition-colors ${

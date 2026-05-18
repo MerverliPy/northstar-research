@@ -49,6 +49,15 @@ export default defineConfig({
   build: {
     outDir: '../static',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules/vis-network')) return 'vis-network'
+          if (id.includes('node_modules/vis-data')) return 'vis-data'
+          if (id.includes('node_modules/vis-')) return 'vis-shared'
+        },
+      },
+    },
   },
   server: {
     port: 5173,

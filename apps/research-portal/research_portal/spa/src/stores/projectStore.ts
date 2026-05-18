@@ -27,26 +27,47 @@ interface ProjectState {
   stats: DashboardStats | null
   loading: boolean
 
+  // Pagination state
+  projectsTotal: number
+  projectsPage: number
+  projectsPageSize: number
+
+  sourcesTotal: number
+  sourcesPage: number
+  sourcesPageSize: number
+
+  entitiesTotal: number
+  entitiesPage: number
+  entitiesPageSize: number
+
+  claimsTotal: number
+  claimsPage: number
+  claimsPageSize: number
+
+  reportsTotal: number
+  reportsPage: number
+  reportsPageSize: number
+
   fetchStats: () => Promise<void>
 
-  fetchProjects: () => Promise<void>
+  fetchProjects: (page?: number, pageSize?: number) => Promise<void>
   createProject: (data: Partial<Project>) => Promise<Project>
   updateProject: (id: string, data: Partial<Project>) => Promise<Project>
   deleteProject: (id: string) => Promise<void>
 
-  fetchSources: (projectId: string) => Promise<void>
+  fetchSources: (projectId: string, page?: number, pageSize?: number) => Promise<void>
   createSource: (data: Partial<Source>) => Promise<Source>
   deleteSource: (id: string) => Promise<void>
 
-  fetchEntities: (filters?: { source_id?: string; project_id?: string }) => Promise<void>
+  fetchEntities: (filters?: { source_id?: string; project_id?: string }, page?: number, pageSize?: number) => Promise<void>
   createEntity: (data: Partial<Entity>) => Promise<Entity>
   deleteEntity: (id: string) => Promise<void>
 
-  fetchClaims: (filters?: { source_id?: string; entity_id?: string }) => Promise<void>
+  fetchClaims: (filters?: { source_id?: string; entity_id?: string }, page?: number, pageSize?: number) => Promise<void>
   createClaim: (data: Partial<Claim>) => Promise<Claim>
   deleteClaim: (id: string) => Promise<void>
 
-  fetchReports: (projectId: string) => Promise<void>
+  fetchReports: (projectId: string, page?: number, pageSize?: number) => Promise<void>
   createReport: (data: Partial<Report>) => Promise<Report>
   deleteReport: (id: string) => Promise<void>
 }
@@ -59,6 +80,26 @@ export const useProjectStore = create<ProjectState>((set) => ({
   reports: [],
   stats: null,
   loading: false,
+
+  projectsTotal: 0,
+  projectsPage: 1,
+  projectsPageSize: 25,
+
+  sourcesTotal: 0,
+  sourcesPage: 1,
+  sourcesPageSize: 25,
+
+  entitiesTotal: 0,
+  entitiesPage: 1,
+  entitiesPageSize: 25,
+
+  claimsTotal: 0,
+  claimsPage: 1,
+  claimsPageSize: 25,
+
+  reportsTotal: 0,
+  reportsPage: 1,
+  reportsPageSize: 25,
 
   fetchStats: async () => {
     const [projects, sources, entities, claims] = await Promise.all([
@@ -78,11 +119,19 @@ export const useProjectStore = create<ProjectState>((set) => ({
     })
   },
 
-  fetchProjects: async () => {
+  fetchProjects: async (page, pageSize) => {
     set({ loading: true })
     try {
-      const data = await apiFetch<PaginatedResponse<Project>>('/projects/?limit=100')
-      set({ projects: data.items })
+      const pg = page ?? useProjectStore.getState().projectsPage
+      const ps = pageSize ?? useProjectStore.getState().projectsPageSize
+      const offset = (pg - 1) * ps
+      const data = await apiFetch<PaginatedResponse<Project>>(`/projects/?limit=${ps}&offset=${offset}`)
+      set({
+        projects: data.items,
+        projectsTotal: data.total,
+        projectsPage: pg,
+        projectsPageSize: ps,
+      })
     } finally {
       set({ loading: false })
     }
@@ -115,11 +164,19 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }))
   },
 
-  fetchSources: async (projectId) => {
+  fetchSources: async (projectId, page, pageSize) => {
+    const pg = page ?? useProjectStore.getState().sourcesPage
+    const ps = pageSize ?? useProjectStore.getState().sourcesPageSize
+    const offset = (pg - 1) * ps
     const data = await apiFetch<PaginatedResponse<Source>>(
-      `/sources/?project_id=${projectId}&limit=100`
+      `/sources/?project_id=${projectId}&limit=${ps}&offset=${offset}`
     )
-    set({ sources: data.items })
+    set({
+      sources: data.items,
+      sourcesTotal: data.total,
+      sourcesPage: pg,
+      sourcesPageSize: ps,
+    })
   },
 
   createSource: async (data) => {
@@ -138,13 +195,22 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }))
   },
 
-  fetchEntities: async (filters) => {
+  fetchEntities: async (filters, page, pageSize) => {
+    const pg = page ?? useProjectStore.getState().entitiesPage
+    const ps = pageSize ?? useProjectStore.getState().entitiesPageSize
+    const offset = (pg - 1) * ps
     const params = new URLSearchParams()
     if (filters?.source_id) params.set('source_id', filters.source_id)
     if (filters?.project_id) params.set('project_id', filters.project_id)
-    params.set('limit', '100')
+    params.set('limit', String(ps))
+    params.set('offset', String(offset))
     const data = await apiFetch<PaginatedResponse<Entity>>(`/entities/?${params}`)
-    set({ entities: data.items })
+    set({
+      entities: data.items,
+      entitiesTotal: data.total,
+      entitiesPage: pg,
+      entitiesPageSize: ps,
+    })
   },
 
   createEntity: async (data) => {
@@ -163,13 +229,22 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }))
   },
 
-  fetchClaims: async (filters) => {
+  fetchClaims: async (filters, page, pageSize) => {
+    const pg = page ?? useProjectStore.getState().claimsPage
+    const ps = pageSize ?? useProjectStore.getState().claimsPageSize
+    const offset = (pg - 1) * ps
     const params = new URLSearchParams()
     if (filters?.source_id) params.set('source_id', filters.source_id)
     if (filters?.entity_id) params.set('entity_id', filters.entity_id)
-    params.set('limit', '100')
+    params.set('limit', String(ps))
+    params.set('offset', String(offset))
     const data = await apiFetch<PaginatedResponse<Claim>>(`/claims/?${params}`)
-    set({ claims: data.items })
+    set({
+      claims: data.items,
+      claimsTotal: data.total,
+      claimsPage: pg,
+      claimsPageSize: ps,
+    })
   },
 
   createClaim: async (data) => {
@@ -188,11 +263,19 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }))
   },
 
-  fetchReports: async (projectId) => {
+  fetchReports: async (projectId, page, pageSize) => {
+    const pg = page ?? useProjectStore.getState().reportsPage
+    const ps = pageSize ?? useProjectStore.getState().reportsPageSize
+    const offset = (pg - 1) * ps
     const data = await apiFetch<PaginatedResponse<Report>>(
-      `/reports/?project_id=${projectId}&limit=100`
+      `/reports/?project_id=${projectId}&limit=${ps}&offset=${offset}`
     )
-    set({ reports: data.items })
+    set({
+      reports: data.items,
+      reportsTotal: data.total,
+      reportsPage: pg,
+      reportsPageSize: ps,
+    })
   },
 
   createReport: async (data) => {

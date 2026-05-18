@@ -1,18 +1,36 @@
 import { useEffect, useState } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
+import { useToastStore } from '../../stores/toastStore'
+import { useForm, required } from '../../hooks/useForm'
 import { Card } from '../shared/Card'
 import { Button } from '../shared/Button'
 import { Modal } from '../shared/Modal'
 import { Table } from '../shared/Table'
+import { Pagination } from '../shared/Pagination'
 import { Badge } from '../shared/Badge'
 import type { Entity } from '../../types'
 
+interface EntityForm {
+  name: string
+  entity_type: string
+  description: string
+  project_id: string
+  source_id: string
+}
+
 export function EntitiesView() {
-  const { entities, projects, fetchEntities, createEntity, deleteEntity, fetchProjects } = useProjectStore()
+  const {
+    entities, projects, entitiesTotal, entitiesPage, entitiesPageSize,
+    fetchEntities, createEntity, deleteEntity, fetchProjects,
+  } = useProjectStore()
+  const addToast = useToastStore((s) => s.addToast)
   const [modalOpen, setModalOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [filterProject, setFilterProject] = useState('')
-  const [form, setForm] = useState({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
+  const { form, errors, setField, validateAll, resetForm } = useForm<EntityForm>(
+    { name: '', entity_type: 'person', description: '', project_id: '', source_id: '' },
+    { name: required('Entity name is required') }
+  )
 
   useEffect(() => {
     fetchProjects()
@@ -24,7 +42,7 @@ export function EntitiesView() {
   }, [filterProject, fetchEntities])
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) return
+    if (!validateAll()) return
     setSubmitting(true)
     try {
       await createEntity({
@@ -34,8 +52,11 @@ export function EntitiesView() {
         project_id: form.project_id || null,
         source_id: form.source_id || null,
       } as Partial<Entity>)
+      addToast('Entity created', 'success')
       setModalOpen(false)
-      setForm({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
+      resetForm({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
+    } catch {
+      addToast('Failed to create entity', 'error')
     } finally {
       setSubmitting(false)
     }
@@ -47,7 +68,7 @@ export function EntitiesView() {
     { key: 'description', header: 'Description', render: (e: Entity) => e.description ? <span className="text-xs text-[#8888aa] line-clamp-1">{e.description.slice(0, 80)}</span> : <span className="text-xs text-[#8888aa]">-</span> },
     { key: 'created_at', header: 'Created', render: (e: Entity) => new Date(e.created_at).toLocaleDateString() },
     { key: 'id', header: '', render: (e: Entity) => (
-      <Button variant="danger" size="sm" onClick={(ev) => { ev.stopPropagation(); deleteEntity(e.id) }}>Delete</Button>
+      <Button variant="danger" size="sm" onClick={async (ev) => { ev.stopPropagation(); try { await deleteEntity(e.id); addToast('Entity deleted', 'success') } catch { addToast('Failed to delete entity', 'error') } }}>Delete</Button>
     )},
   ]
 
@@ -72,24 +93,39 @@ export function EntitiesView() {
 
       <Card variant="surface">
         <Table columns={columns} data={entities} keyField="id" emptyMessage="No entities yet" />
+        <Pagination
+          currentPage={entitiesPage}
+          totalPages={Math.max(1, Math.ceil(entitiesTotal / entitiesPageSize))}
+          total={entitiesTotal}
+          pageSize={entitiesPageSize}
+          onPageChange={(p) => fetchEntities(filterProject ? { project_id: filterProject } : undefined, p)}
+          onPageSizeChange={(size) => fetchEntities(filterProject ? { project_id: filterProject } : undefined, 1, size)}
+        />
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New Entity">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Name</label>
+            <label htmlFor="entity-name" className="block text-sm text-[#8888aa] mb-1">Name</label>
             <input
+              id="entity-name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
+              onChange={(e) => setField('name', e.target.value)}
+              className={`w-full bg-[#1a1a2e] border rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors ${errors.name ? 'border-red-500' : 'border-[#2a2a4a]'}`}
               placeholder="Entity name"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'entity-name-error' : undefined}
             />
+            {errors.name && (
+              <span id="entity-name-error" className="block text-xs text-red-400 mt-1">{errors.name}</span>
+            )}
           </div>
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Type</label>
+            <label htmlFor="entity-type" className="block text-sm text-[#8888aa] mb-1">Type</label>
             <select
+              id="entity-type"
               value={form.entity_type}
-              onChange={(e) => setForm({ ...form, entity_type: e.target.value })}
+              onChange={(e) => setField('entity_type', e.target.value)}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
             >
               <option value="person">Person</option>
@@ -101,10 +137,11 @@ export function EntitiesView() {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Description</label>
+            <label htmlFor="entity-desc" className="block text-sm text-[#8888aa] mb-1">Description</label>
             <textarea
+              id="entity-desc"
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) => setField('description', e.target.value)}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
               rows={2}
               placeholder="Optional"
@@ -112,7 +149,7 @@ export function EntitiesView() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!form.name.trim()} loading={submitting}>Create</Button>
+            <Button onClick={handleSubmit} loading={submitting}>Create</Button>
           </div>
         </div>
       </Modal>

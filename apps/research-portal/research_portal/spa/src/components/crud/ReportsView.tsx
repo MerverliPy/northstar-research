@@ -1,17 +1,34 @@
 import { useEffect, useState } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
+import { useToastStore } from '../../stores/toastStore'
+import { useForm, required } from '../../hooks/useForm'
 import { Card } from '../shared/Card'
 import { Button } from '../shared/Button'
 import { Modal } from '../shared/Modal'
 import { Table } from '../shared/Table'
+import { Pagination } from '../shared/Pagination'
 import type { Report } from '../../types'
 
+interface ReportForm {
+  title: string
+  content: string
+  report_type: string
+  project_id: string
+}
+
 export function ReportsView() {
-  const { reports, projects, fetchReports, createReport, deleteReport, fetchProjects } = useProjectStore()
+  const {
+    reports, projects, reportsTotal, reportsPage, reportsPageSize,
+    fetchReports, createReport, deleteReport, fetchProjects,
+  } = useProjectStore()
+  const addToast = useToastStore((s) => s.addToast)
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [form, setForm] = useState({ title: '', content: '', report_type: 'summary', project_id: '' })
+  const { form, errors, setField, validateAll, resetForm } = useForm<ReportForm>(
+    { title: '', content: '', report_type: 'summary', project_id: '' },
+    { title: required('Report title is required') }
+  )
 
   useEffect(() => {
     fetchProjects()
@@ -22,7 +39,7 @@ export function ReportsView() {
   }, [selectedProject, fetchReports])
 
   const handleSubmit = async () => {
-    if (!form.title.trim() || !form.project_id) return
+    if (!validateAll() || !form.project_id) return
     setSubmitting(true)
     try {
       await createReport({
@@ -31,8 +48,11 @@ export function ReportsView() {
         report_type: form.report_type,
         project_id: form.project_id,
       } as Partial<Report>)
+      addToast('Report created', 'success')
       setModalOpen(false)
-      setForm({ title: '', content: '', report_type: 'summary', project_id: '' })
+      resetForm({ title: '', content: '', report_type: 'summary', project_id: '' })
+    } catch {
+      addToast('Failed to create report', 'error')
     } finally {
       setSubmitting(false)
     }
@@ -43,7 +63,7 @@ export function ReportsView() {
     { key: 'report_type', header: 'Type', render: (r: Report) => <span className="text-xs text-[#8888aa]">{r.report_type}</span> },
     { key: 'created_at', header: 'Created', render: (r: Report) => new Date(r.created_at).toLocaleDateString() },
     { key: 'id', header: '', render: (r: Report) => (
-      <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); deleteReport(r.id) }}>Delete</Button>
+      <Button variant="danger" size="sm" onClick={async (e) => { e.stopPropagation(); try { await deleteReport(r.id); addToast('Report deleted', 'success') } catch { addToast('Failed to delete report', 'error') } }}>Delete</Button>
     )},
   ]
 
@@ -62,7 +82,7 @@ export function ReportsView() {
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-          <Button onClick={() => { setModalOpen(true); setForm({ ...form, project_id: selectedProject }) }} disabled={!selectedProject}>
+          <Button onClick={() => { setModalOpen(true); setField('project_id', selectedProject) }} disabled={!selectedProject}>
             + New Report
           </Button>
         </div>
@@ -77,26 +97,43 @@ export function ReportsView() {
             <p className="text-sm text-[#8888aa]">Select a project to view its reports</p>
           </div>
         ) : (
-          <Table columns={columns} data={reports} keyField="id" emptyMessage="No reports yet" />
+          <>
+            <Table columns={columns} data={reports} keyField="id" emptyMessage="No reports yet" />
+            <Pagination
+              currentPage={reportsPage}
+              totalPages={Math.max(1, Math.ceil(reportsTotal / reportsPageSize))}
+              total={reportsTotal}
+              pageSize={reportsPageSize}
+              onPageChange={(p) => { if (selectedProject) fetchReports(selectedProject, p) }}
+              onPageSizeChange={(size) => { if (selectedProject) fetchReports(selectedProject, 1, size) }}
+            />
+          </>
         )}
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New Report">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Title</label>
+            <label htmlFor="report-title" className="block text-sm text-[#8888aa] mb-1">Title</label>
             <input
+              id="report-title"
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
+              onChange={(e) => setField('title', e.target.value)}
+              className={`w-full bg-[#1a1a2e] border rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors ${errors.title ? 'border-red-500' : 'border-[#2a2a4a]'}`}
               placeholder="Report title"
+              aria-invalid={!!errors.title}
+              aria-describedby={errors.title ? 'report-title-error' : undefined}
             />
+            {errors.title && (
+              <span id="report-title-error" className="block text-xs text-red-400 mt-1">{errors.title}</span>
+            )}
           </div>
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Type</label>
+            <label htmlFor="report-type" className="block text-sm text-[#8888aa] mb-1">Type</label>
             <select
+              id="report-type"
               value={form.report_type}
-              onChange={(e) => setForm({ ...form, report_type: e.target.value })}
+              onChange={(e) => setField('report_type', e.target.value)}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
             >
               <option value="summary">Summary</option>
@@ -106,10 +143,11 @@ export function ReportsView() {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Content</label>
+            <label htmlFor="report-content" className="block text-sm text-[#8888aa] mb-1">Content</label>
             <textarea
+              id="report-content"
               value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              onChange={(e) => setField('content', e.target.value)}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
               rows={6}
               placeholder="Report content…"
@@ -117,7 +155,7 @@ export function ReportsView() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!form.title.trim()} loading={submitting}>Create</Button>
+            <Button onClick={handleSubmit} loading={submitting}>Create</Button>
           </div>
         </div>
       </Modal>

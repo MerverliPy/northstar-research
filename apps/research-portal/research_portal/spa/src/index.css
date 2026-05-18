@@ -1,12 +1,46 @@
 @import "tailwindcss";
 
-@theme {
+/* Light theme tokens (default) */
+:root {
+  --color-northstar-dark: #f0f2f5;
+  --color-northstar-accent: #e94560;
+  --color-northstar-surface: #ffffff;
+  --color-northstar-border: #d1d5db;
+  --color-northstar-text: #1a1a2e;
+  --color-northstar-muted: #6b7280;
+
+  --color-sidebar-bg: #f8f9fa;
+  --color-sidebar-border: #e5e7eb;
+  --color-sidebar-hover: #e5e7eb;
+  --color-sidebar-text: #6b7280;
+  --color-sidebar-active-bg: #fce7f3;
+  --color-sidebar-active-text: #e94560;
+}
+
+/* Dark theme overrides */
+.dark {
   --color-northstar-dark: #1a1a2e;
   --color-northstar-accent: #e94560;
   --color-northstar-surface: #16213e;
   --color-northstar-border: #2a2a4a;
   --color-northstar-text: #e0e0e0;
   --color-northstar-muted: #8888aa;
+
+  --color-sidebar-bg: #0f0f23;
+  --color-sidebar-border: #2a2a4a;
+  --color-sidebar-hover: rgba(42, 42, 74, 0.3);
+  --color-sidebar-text: #8888aa;
+  --color-sidebar-active-bg: rgba(233, 69, 96, 0.1);
+  --color-sidebar-active-text: #e94560;
+}
+
+@theme {
+  --color-northstar-dark: var(--color-northstar-dark);
+  --color-northstar-accent: var(--color-northstar-accent);
+  --color-northstar-surface: var(--color-northstar-surface);
+  --color-northstar-border: var(--color-northstar-border);
+  --color-northstar-text: var(--color-northstar-text);
+  --color-northstar-muted: var(--color-northstar-muted);
 }
 
 * {
@@ -25,6 +59,7 @@ html, body, #root {
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Prevent layout shift from scrollbar appearing */
@@ -72,6 +107,16 @@ p, h1, h2, h3, h4, h5, h6 {
 /* vis-network overrides */
 .vis-network:focus {
   outline: none;
+}
+
+/* Toast animations */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(1rem) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 /* Skeleton animation for loading states */
