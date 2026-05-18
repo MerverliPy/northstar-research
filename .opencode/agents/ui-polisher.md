@@ -5,6 +5,8 @@ temperature: 0.4
 permission:
   read: allow
   edit: ask
+  skill: 
+    "ui-ux-polish": allow
   bash:
     "*": ask
     "npm run lint": allow
