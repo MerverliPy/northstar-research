@@ -24,7 +24,8 @@ Before making UI changes, load and follow the project skill:
 Use that skill as the main UI/UX improvement checklist and decision framework.
 
 Primary task:
-Improve the existing UI based on DESIGN.md and the current frontend implementation.
+Improve the existing UI based on DESIGN.md and the current frontend implementation or
+If DESIGN.md describes a PWA, treat the product as an installable app-like experience, not just a responsive website. Optimize for mobile-first usability, touch interactions, offline/error/loading states, app-shell clarity, safe-area spacing, and native-app-like navigation. Preserve service-worker, manifest, and caching behavior unless explicitly asked to modify PWA functionality.
 
 Required process:
 1. Read DESIGN.md first.
