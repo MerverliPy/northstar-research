@@ -34,6 +34,7 @@ export function ImportView() {
 
   useEffect(() => {
     fetchImports()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handlePaste = async () => {
@@ -98,8 +99,8 @@ export function ImportView() {
     { key: 'id', header: '', render: (i: StagedImport) => (
       <div className="flex gap-2">
         {i.status === 'pending' && (
-          <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); promoteOne(i.id) }} disabled={promoting === i.id}>
-            {promoting === i.id ? '…' : 'Promote'}
+          <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); promoteOne(i.id) }} loading={promoting === i.id}>
+            Promote
           </Button>
         )}
         <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); deleteImport(i.id) }}>Delete</Button>
@@ -115,22 +116,37 @@ export function ImportView() {
         <h1 className="text-xl font-bold text-white">Chat Import Bridge</h1>
         <div className="flex gap-3">
           <Button variant="secondary" onClick={() => setModalOpen(true)}>+ Paste Import</Button>
-          <Button onClick={promoteAll} disabled={batchPromoting || pendingCount === 0}>
-            {batchPromoting ? 'Promoting…' : `Promote All (${pendingCount})`}
+          <Button onClick={promoteAll} disabled={batchPromoting || pendingCount === 0} loading={batchPromoting}>
+            Promote All ({pendingCount})
           </Button>
         </div>
       </div>
 
       {result && (
-        <div className="bg-green-900/20 border border-green-700 text-green-300 text-sm rounded-lg px-4 py-3 mb-4 font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
+        <div className="relative bg-green-900/20 border border-green-700/50 text-green-300 text-sm rounded-lg px-4 py-3 mb-4 font-mono whitespace-pre-wrap max-h-40 overflow-y-auto animate-pulse">
+          <button
+            onClick={() => setResult(null)}
+            className="absolute top-2 right-2 text-xs text-[#8888aa] hover:text-white transition-colors"
+          >
+            Dismiss
+          </button>
           {result}
-          <button onClick={() => setResult(null)} className="float-right text-xs text-[#8888aa] hover:text-white">×</button>
         </div>
       )}
 
-      <Card>
-        {loading ? (
-          <p className="text-[#8888aa] text-sm py-4 text-center">Loading imports…</p>
+      <Card variant="surface">
+        {loading && imports.length === 0 ? (
+          <div className="space-y-3 p-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex gap-4">
+                <div className="skeleton h-4 flex-1" />
+                <div className="skeleton h-4 w-16" />
+                <div className="skeleton h-4 w-20" />
+                <div className="skeleton h-4 w-24" />
+                <div className="skeleton h-4 w-28" />
+              </div>
+            ))}
+          </div>
         ) : (
           <Table columns={columns} data={imports} keyField="id" emptyMessage="No staged imports. Paste a chat transcript to get started." />
         )}
@@ -143,7 +159,7 @@ export function ImportView() {
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
               placeholder="Import title"
             />
           </div>
@@ -152,12 +168,12 @@ export function ImportView() {
             <textarea
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] resize-none"
-              rows={10}
-              placeholder="Paste chat transcript content here…"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
+              rows={6}
+              placeholder="Paste chat transcript..."
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button onClick={handlePaste} disabled={!form.content.trim()}>Import</Button>
           </div>

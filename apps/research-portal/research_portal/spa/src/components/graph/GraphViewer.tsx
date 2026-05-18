@@ -3,6 +3,25 @@ import { useProjectStore } from '../../stores/projectStore'
 import { Card } from '../shared/Card'
 import type { GraphData } from '../../types'
 
+function GraphSkeleton() {
+  return (
+    <div className="flex items-center justify-center h-full p-8">
+      <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+        <div className="flex gap-4">
+          <div className="skeleton w-12 h-12 rounded-full" />
+          <div className="skeleton w-16 h-16 rounded-full" />
+          <div className="skeleton w-10 h-10 rounded-full" />
+        </div>
+        <div className="flex gap-3">
+          <div className="skeleton w-14 h-14 rounded-full" />
+          <div className="skeleton w-12 h-12 rounded-full" />
+        </div>
+        <div className="skeleton h-3 w-24 mt-2" />
+      </div>
+    </div>
+  )
+}
+
 export function GraphViewer() {
   const { projects, fetchProjects } = useProjectStore()
   const [selectedProject, setSelectedProject] = useState('')
@@ -101,7 +120,7 @@ export function GraphViewer() {
         <select
           value={selectedProject}
           onChange={(e) => setSelectedProject(e.target.value)}
-          className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+          className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
         >
           <option value="">Select project…</option>
           {projects.map((p) => (
@@ -110,18 +129,29 @@ export function GraphViewer() {
         </select>
       </div>
 
-      <Card className="flex-1 min-h-[500px] p-0 overflow-hidden">
+      <Card className="flex-1 min-h-[500px] p-0 overflow-hidden" variant="surface">
         {!selectedProject ? (
-          <div className="flex items-center justify-center h-full text-[#8888aa] text-sm">
-            Select a project to visualize its knowledge graph
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-[#8888aa] text-sm p-8">
+            <svg className="w-12 h-12 text-[#2a2a4a]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            <span>Select a project to visualize its knowledge graph</span>
           </div>
         ) : loading ? (
-          <div className="flex items-center justify-center h-full text-[#8888aa] text-sm">
-            Loading graph…
-          </div>
+          <GraphSkeleton />
         ) : error ? (
-          <div className="flex items-center justify-center h-full text-red-400 text-sm">
-            {error}
+          <div className="flex flex-col items-center justify-center h-full gap-3 p-8">
+            <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span className="text-red-400 text-sm">{error}</span>
+            <button
+              onClick={() => selectedProject && loadGraph(selectedProject)}
+              className="text-xs text-[#8888aa] hover:text-white transition-colors underline"
+            >
+              Retry
+            </button>
           </div>
         ) : (
           <div ref={containerRef} id="graph-container" className="w-full h-full" />

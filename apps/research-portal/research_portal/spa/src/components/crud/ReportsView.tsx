@@ -10,6 +10,7 @@ export function ReportsView() {
   const { reports, projects, fetchReports, createReport, deleteReport, fetchProjects } = useProjectStore()
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ title: '', content: '', report_type: 'summary', project_id: '' })
 
   useEffect(() => {
@@ -22,14 +23,19 @@ export function ReportsView() {
 
   const handleSubmit = async () => {
     if (!form.title.trim() || !form.project_id) return
-    await createReport({
-      title: form.title,
-      content: form.content,
-      report_type: form.report_type,
-      project_id: form.project_id,
-    } as Partial<Report>)
-    setModalOpen(false)
-    setForm({ title: '', content: '', report_type: 'summary', project_id: '' })
+    setSubmitting(true)
+    try {
+      await createReport({
+        title: form.title,
+        content: form.content,
+        report_type: form.report_type,
+        project_id: form.project_id,
+      } as Partial<Report>)
+      setModalOpen(false)
+      setForm({ title: '', content: '', report_type: 'summary', project_id: '' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const columns = [
@@ -49,7 +55,7 @@ export function ReportsView() {
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+            className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
           >
             <option value="">Select project…</option>
             {projects.map((p) => (
@@ -62,9 +68,14 @@ export function ReportsView() {
         </div>
       </div>
 
-      <Card>
+      <Card variant="surface">
         {!selectedProject ? (
-          <p className="text-[#8888aa] text-sm py-4 text-center">Select a project to view its reports</p>
+          <div className="flex flex-col items-center gap-3 py-8">
+            <svg className="w-10 h-10 text-[#2a2a4a]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <p className="text-sm text-[#8888aa]">Select a project to view its reports</p>
+          </div>
         ) : (
           <Table columns={columns} data={reports} keyField="id" emptyMessage="No reports yet" />
         )}
@@ -77,7 +88,7 @@ export function ReportsView() {
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
               placeholder="Report title"
             />
           </div>
@@ -86,7 +97,7 @@ export function ReportsView() {
             <select
               value={form.report_type}
               onChange={(e) => setForm({ ...form, report_type: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
             >
               <option value="summary">Summary</option>
               <option value="analysis">Analysis</option>
@@ -99,14 +110,14 @@ export function ReportsView() {
             <textarea
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] resize-none"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
               rows={6}
               placeholder="Report content…"
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!form.title.trim()}>Create</Button>
+            <Button onClick={handleSubmit} disabled={!form.title.trim()} loading={submitting}>Create</Button>
           </div>
         </div>
       </Modal>

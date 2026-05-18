@@ -13,6 +13,53 @@ interface TableProps<T> {
   keyField: keyof T
   onRowClick?: (item: T) => void
   emptyMessage?: string
+  emptyAction?: ReactNode
+  loading?: boolean
+  loadingRows?: number
+  stickyHeader?: boolean
+}
+
+const SKELETON_WIDTHS = ['65%', '80%', '55%', '70%', '60%']
+
+function SkeletonRow({ columns }: { columns: number }) {
+  return (
+    <tr className="border-b border-[#2a2a4a]/50">
+      {Array.from({ length: columns }).map((_, i) => (
+        <td key={i} className="px-3 py-3">
+          <div
+            className="skeleton h-4"
+            style={{ width: SKELETON_WIDTHS[i % SKELETON_WIDTHS.length] }}
+          />
+        </td>
+      ))}
+    </tr>
+  )
+}
+
+function EmptyState({ message, action }: { message: string; action?: ReactNode }) {
+  return (
+    <tr>
+      <td colSpan={99} className="px-3 py-12 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <svg
+            className="w-10 h-10 text-[#2a2a4a]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 11.625l2.25-2.25M12 11.625l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+            />
+          </svg>
+          <span className="text-sm text-[#8888aa]">{message}</span>
+          {action}
+        </div>
+      </td>
+    </tr>
+  )
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,6 +69,10 @@ export function Table<T extends Record<string, any>>({
   keyField,
   onRowClick,
   emptyMessage = 'No data',
+  emptyAction,
+  loading,
+  loadingRows = 5,
+  stickyHeader,
 }: TableProps<T>) {
   const cellValue = (item: T, col: Column<T>): ReactNode => {
     if (col.render) return col.render(item)
@@ -33,13 +84,13 @@ export function Table<T extends Record<string, any>>({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse" role="table">
         <thead>
-          <tr>
+          <tr className={stickyHeader ? 'sticky top-0 z-10' : ''}>
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`text-left px-3 py-2 border-b border-[#2a2a4a] text-xs uppercase tracking-wider text-[#8888aa] font-medium ${col.className || ''}`}
+                className={`text-left px-3 py-2 border-b border-[#2a2a4a] text-xs uppercase tracking-wider text-[#8888aa] font-medium bg-[#16213e] ${col.className || ''}`}
               >
                 {col.header}
               </th>
@@ -47,17 +98,21 @@ export function Table<T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody>
-          {data.length === 0 ? (
-            <tr>
-              <td colSpan={columns.length} className="px-3 py-8 text-center text-[#8888aa]">
-                {emptyMessage}
-              </td>
-            </tr>
+          {loading ? (
+            Array.from({ length: loadingRows }).map((_, i) => (
+              <SkeletonRow key={i} columns={columns.length} />
+            ))
+          ) : data.length === 0 ? (
+            <EmptyState message={emptyMessage} action={emptyAction} />
           ) : (
             data.map((item) => (
               <tr
                 key={String(item[keyField])}
-                className={`border-b border-[#2a2a4a]/50 ${onRowClick ? 'cursor-pointer hover:bg-[#2a2a4a]/30 transition-colors' : ''}`}
+                className={`border-b border-[#2a2a4a]/50 transition-colors ${
+                  onRowClick
+                    ? 'cursor-pointer hover:bg-[#2a2a4a]/30'
+                    : 'hover:bg-[#2a2a4a]/10'
+                }`}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map((col) => (

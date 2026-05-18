@@ -79,8 +79,13 @@ export const useProjectStore = create<ProjectState>((set) => ({
   },
 
   fetchProjects: async () => {
-    const data = await apiFetch<PaginatedResponse<Project>>('/projects/?limit=100')
-    set({ projects: data.items })
+    set({ loading: true })
+    try {
+      const data = await apiFetch<PaginatedResponse<Project>>('/projects/?limit=100')
+      set({ projects: data.items })
+    } finally {
+      set({ loading: false })
+    }
   },
 
   createProject: async (data) => {

@@ -154,24 +154,32 @@ export function ChatView() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a4a]">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[#2a2a4a]">
         <h1 className="text-sm font-semibold text-white">AI Research Assistant</h1>
         <Button variant="ghost" size="sm" onClick={newConversation}>
           + New Chat
         </Button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
         {messages.length === 0 && !isStreaming && (
           <div className="flex flex-col items-center justify-center h-full text-center text-[#8888aa]">
-            <div className="text-4xl mb-4">🧪</div>
+            <svg
+              className="w-12 h-12 mb-4 text-[#e94560]/40"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
             <h2 className="text-lg font-semibold text-white mb-2">Northstar Research Assistant</h2>
-            <p className="text-sm max-w-md">
+            <p className="text-sm max-w-md leading-relaxed">
               I can search your research database, extract entities and claims from sources,
               score content quality, visualize knowledge graphs, manage cleanup operations,
               and help with chat imports. What would you like to do?
             </p>
-            <div className="flex flex-wrap gap-2 justify-center mt-4">
+            <div className="flex flex-wrap gap-2 justify-center mt-6 max-w-lg">
               {[
                 'List all projects and their sources',
                 'Extract entities from my latest source',
@@ -182,7 +190,7 @@ export function ChatView() {
                 <button
                   key={suggestion}
                   onClick={() => handleSend(suggestion)}
-                  className="px-3 py-1.5 text-xs bg-[#2a2a4a] text-[#e0e0e0] rounded-full hover:bg-[#3a3a5a] transition-colors"
+                  className="px-4 py-2 text-xs bg-[#2a2a4a]/60 text-[#e0e0e0] rounded-full hover:bg-[#3a3a5a] hover:text-white hover:border-[#e94560]/30 transition-all duration-150 border border-transparent"
                 >
                   {suggestion}
                 </button>
@@ -197,7 +205,7 @@ export function ChatView() {
 
         {isStreaming && thinkingText && (
           <div className="flex gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-[#2a2a4a] flex items-center justify-center text-sm flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#2a2a4a] flex items-center justify-center text-sm font-bold flex-shrink-0">
               AI
             </div>
             <div className="bg-[#16213e] border border-[#2a2a4a] rounded-lg px-4 py-2.5">

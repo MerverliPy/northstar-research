@@ -10,6 +10,7 @@ import type { Entity } from '../../types'
 export function EntitiesView() {
   const { entities, projects, fetchEntities, createEntity, deleteEntity, fetchProjects } = useProjectStore()
   const [modalOpen, setModalOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [filterProject, setFilterProject] = useState('')
   const [form, setForm] = useState({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
 
@@ -24,15 +25,20 @@ export function EntitiesView() {
 
   const handleSubmit = async () => {
     if (!form.name.trim()) return
-    await createEntity({
-      name: form.name,
-      entity_type: form.entity_type,
-      description: form.description || null,
-      project_id: form.project_id || null,
-      source_id: form.source_id || null,
-    } as Partial<Entity>)
-    setModalOpen(false)
-    setForm({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
+    setSubmitting(true)
+    try {
+      await createEntity({
+        name: form.name,
+        entity_type: form.entity_type,
+        description: form.description || null,
+        project_id: form.project_id || null,
+        source_id: form.source_id || null,
+      } as Partial<Entity>)
+      setModalOpen(false)
+      setForm({ name: '', entity_type: 'person', description: '', project_id: '', source_id: '' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const columns = [
@@ -53,7 +59,7 @@ export function EntitiesView() {
           <select
             value={filterProject}
             onChange={(e) => setFilterProject(e.target.value)}
-            className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+            className="bg-[#16213e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
           >
             <option value="">All projects</option>
             {projects.map((p) => (
@@ -64,7 +70,7 @@ export function EntitiesView() {
         </div>
       </div>
 
-      <Card>
+      <Card variant="surface">
         <Table columns={columns} data={entities} keyField="id" emptyMessage="No entities yet" />
       </Card>
 
@@ -75,7 +81,7 @@ export function EntitiesView() {
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
               placeholder="Entity name"
             />
           </div>
@@ -84,7 +90,7 @@ export function EntitiesView() {
             <select
               value={form.entity_type}
               onChange={(e) => setForm({ ...form, entity_type: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] transition-colors"
             >
               <option value="person">Person</option>
               <option value="organization">Organization</option>
@@ -99,14 +105,14 @@ export function EntitiesView() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] resize-none"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
               rows={2}
               placeholder="Optional"
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!form.name.trim()}>Create</Button>
+            <Button onClick={handleSubmit} disabled={!form.name.trim()} loading={submitting}>Create</Button>
           </div>
         </div>
       </Modal>

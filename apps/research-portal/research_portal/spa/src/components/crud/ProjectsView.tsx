@@ -7,9 +7,10 @@ import { Table } from '../shared/Table'
 import type { Project } from '../../types'
 
 export function ProjectsView() {
-  const { projects, fetchProjects, createProject, updateProject, deleteProject } = useProjectStore()
+  const { projects, loading, fetchProjects, createProject, updateProject, deleteProject } = useProjectStore()
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Project | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ name: '', description: '' })
 
   useEffect(() => {
@@ -30,12 +31,17 @@ export function ProjectsView() {
 
   const handleSubmit = async () => {
     if (!form.name.trim()) return
-    if (editing) {
-      await updateProject(editing.id, { name: form.name, description: form.description || null })
-    } else {
-      await createProject({ name: form.name, description: form.description || null })
+    setSubmitting(true)
+    try {
+      if (editing) {
+        await updateProject(editing.id, { name: form.name, description: form.description || null })
+      } else {
+        await createProject({ name: form.name, description: form.description || null })
+      }
+      setModalOpen(false)
+    } finally {
+      setSubmitting(false)
     }
-    setModalOpen(false)
   }
 
   const columns = [
@@ -57,8 +63,19 @@ export function ProjectsView() {
         <Button onClick={openCreate}>+ New Project</Button>
       </div>
 
-      <Card>
-        <Table columns={columns} data={projects} keyField="id" emptyMessage="No projects yet" />
+      <Card variant="surface">
+        <Table
+          columns={columns}
+          data={projects}
+          keyField="id"
+          loading={loading}
+          emptyMessage="No projects yet"
+          emptyAction={
+            <Button size="sm" onClick={openCreate}>
+              Create your first project
+            </Button>
+          }
+        />
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Project' : 'New Project'}>
@@ -68,7 +85,7 @@ export function ProjectsView() {
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560]"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
               placeholder="Project name"
             />
           </div>
@@ -77,14 +94,14 @@ export function ProjectsView() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e94560] resize-none"
+              className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"
               rows={3}
               placeholder="Optional description"
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!form.name.trim()}>
+            <Button onClick={handleSubmit} disabled={!form.name.trim()} loading={submitting}>
               {editing ? 'Update' : 'Create'}
             </Button>
           </div>
