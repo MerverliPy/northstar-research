@@ -234,3 +234,39 @@ class CleanupReport(BaseModel):
     items_to_review: list[str]
     orphans: list[str]
     suggestions: list[str]
+
+
+class ScraperProxy(BaseModel):
+    server: str
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+
+class ScraperFingerprint(BaseModel):
+    seed: Optional[int] = None
+    platform: Optional[str] = None
+    viewport_width: Optional[int] = None
+    viewport_height: Optional[int] = None
+    hardware_concurrency: Optional[int] = None
+    user_agent: Optional[str] = None
+
+
+class ScrapeRequest(BaseModel):
+    project_id: uuid.UUID
+    url: str
+    title: Optional[str] = None
+    proxy: Optional[ScraperProxy] = None
+    fingerprint: Optional[ScraperFingerprint] = None
+    extract: bool = False
+    headless: bool = True
+    wait_until: str = "networkidle"
+    max_content_length: int = 10000
+
+
+class ScrapeResponse(BaseModel):
+    source: SourceRead
+    title: str
+    url: str
+    word_count: int
+    fingerprint_seed: Optional[int] = None
+    took_ms: int

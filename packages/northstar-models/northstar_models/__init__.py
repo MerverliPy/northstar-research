@@ -14,6 +14,7 @@ from northstar_models.schemas import (
     ExtractionRequest, ExtractionResponse,
     SearchRequest, SearchResult,
     CleanupReport,
+    ScrapeRequest, ScrapeResponse, ScraperProxy, ScraperFingerprint,
 )
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     "ExtractionRequest", "ExtractionResponse",
     "SearchRequest", "SearchResult",
     "CleanupReport",
+    "ScrapeRequest", "ScrapeResponse", "ScraperProxy", "ScraperFingerprint",
 ]

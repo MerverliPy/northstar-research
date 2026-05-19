@@ -20,5 +20,8 @@ dependencies = [
     "northstar-db",
 ]
 
+[project.optional-dependencies]
+scraper = ["playwright>=1.40", "cloakbrowser>=0.3.14"]
+
 [tool.setuptools]
 packages = ["research_agent"]

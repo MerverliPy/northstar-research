@@ -3,6 +3,10 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 
 FROM base AS agent
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libnss3 libnspr4 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
+    libgbm1 libasound2 libcups2 libxshmfence1 libgtk-3-0 \
+    && rm -rf /var/lib/apt/lists/*
 COPY packages/northstar-models /app/packages/northstar-models
 COPY packages/northstar-llm /app/packages/northstar-llm
 COPY packages/northstar-vector /app/packages/northstar-vector

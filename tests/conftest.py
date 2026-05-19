@@ -218,13 +218,32 @@ def mock_vector_store():
 
 
 @pytest.fixture
-def agent_app(mock_db, mock_llm_service, mock_neo4j, mock_vector_store, test_settings):
+def mock_scraper():
+    scraper = AsyncMock()
+    scraper.scrape = AsyncMock(
+        return_value=MagicMock(
+            url="https://example.com",
+            title="Mock Page",
+            content="Mock extracted text content",
+            word_count=5,
+            fingerprint_seed=None,
+            took_ms=100,
+        )
+    )
+    scraper._enabled = True
+    scraper._initialized = True
+    yield scraper
+
+
+@pytest.fixture
+def agent_app(mock_db, mock_llm_service, mock_neo4j, mock_vector_store, mock_scraper, test_settings):
     with patch.multiple(
         "research_agent.dependencies",
         _db=mock_db,
         _llm=mock_llm_service,
         _neo4j=mock_neo4j,
         _vector_store=mock_vector_store,
+        _scraper=mock_scraper,
     ), patch("research_agent.config.settings.force_graph_extraction", False), patch(
         "research_agent.config.settings.enable_destructive_cleanup", False
     ):

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from research_agent.config import settings
 from research_agent.dependencies import close_services, init_services
-from research_agent.routers import claims, cleanup, entities, extraction, projects, quality, reports, search, sources
+from research_agent.routers import claims, cleanup, entities, extraction, projects, quality, reports, scraping, search, sources
 
 logger = structlog.get_logger(__name__)
 
@@ -44,6 +44,7 @@ app.include_router(extraction.router, prefix="/api/v1")
 app.include_router(quality.router, prefix="/api/v1")
 app.include_router(cleanup.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
+app.include_router(scraping.router, prefix="/api/v1")
 
 
 @app.get("/health")

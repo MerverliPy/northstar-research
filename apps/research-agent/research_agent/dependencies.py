@@ -15,10 +15,16 @@ _llm: LLMService | None = None
 _embedding: EmbeddingService | None = None
 _vector_store: VectorStore | None = None
 _neo4j: Neo4jRepository | None = None
+_scraper: "WebScraper | None" = None
+
+
+def _import_scraper():
+    from research_agent.services.scraper import WebScraper  # noqa: F401
+    return WebScraper
 
 
 async def init_services(settings: Settings) -> None:
-    global _db, _llm, _embedding, _vector_store, _neo4j
+    global _db, _llm, _embedding, _vector_store, _neo4j, _scraper
 
     _db = PostgresRepository(database_url=settings.database_url)
     await _db.initialize()
@@ -46,6 +52,11 @@ async def init_services(settings: Settings) -> None:
         fallback_model=settings.fallback_llm_model,
         ollama_base_url=settings.ollama_base_url,
     )
+
+    if settings.scraper_enabled:
+        WebScraperCls = _import_scraper()
+        _scraper = WebScraperCls(settings)
+        await _scraper.initialize()
 
     logger.info("services_initialized")
 
@@ -93,6 +104,17 @@ async def get_neo4j() -> AsyncGenerator[Neo4jRepository, None]:
     if _neo4j is None:
         raise RuntimeError("Neo4jRepository not initialized")
     yield _neo4j
+
+
+async def get_scraper() -> "AsyncGenerator[WebScraper, None]":
+    if _scraper is None:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=503,
+            detail="Web scraper not enabled. Set SCRAPER_ENABLED=true and install: pip install research-agent[scraper]",
+        )
+    yield _scraper
 
 
 async def get_settings() -> Settings:

@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     force_graph_extraction: bool = False
     enable_destructive_cleanup: bool = False
     log_level: str = "INFO"
+    scraper_enabled: bool = False
+    cloakbrowser_binary: str | None = None
+    scraper_default_headless: bool = True
+    scraper_timeout_seconds: int = 60
+    scraper_max_content_length: int = 10000
+    scraper_url_allowlist: list[str] | None = None
 
     model_config = {"env_prefix": "", "case_sensitive": False}
 
