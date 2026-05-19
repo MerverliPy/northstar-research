@@ -6,8 +6,9 @@ compatibility: opencode
 
 Use this skill when improving an existing UI.
 
-Checklist:
-- Read DESIGN.md, README, package files, and relevant UI components.
+## Core UI/UX checklist
+
+- Read DESIGN.md when present, README, package files, and relevant UI components.
 - Identify the framework and styling system.
 - Preserve app logic.
 - Improve visual hierarchy.
@@ -21,7 +22,7 @@ Checklist:
 - Avoid changing unrelated files.
 - Run lint/build/typecheck when available.
 
-- ## PWA-specific UI/UX checklist
+## PWA-specific UI/UX checklist
 
 When the project is a Progressive Web App or DESIGN.md describes a PWA, also evaluate:
 
@@ -50,6 +51,7 @@ When the project is a Progressive Web App or DESIGN.md describes a PWA, also eva
 Do not modify service worker, manifest, caching strategy, or install behavior unless the user explicitly asks for PWA functionality changes.
 
 If PWA files are present, inspect but treat carefully:
+
 - manifest.json
 - public/manifest.json
 - service-worker.js
