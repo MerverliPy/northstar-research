@@ -78,6 +78,8 @@ async def close_services() -> None:
         await _llm.close()
     if _embedding is not None:
         await _embedding.close()
+    if _vector_store is not None:
+        await _vector_store.close()
 
     logger.info("services_closed")
 

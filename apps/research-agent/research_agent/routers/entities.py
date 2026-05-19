@@ -14,7 +14,7 @@ router = APIRouter(prefix="/entities", tags=["Entities"])
 async def list_entities(
     source_id: uuid.UUID | None = Query(None),
     project_id: uuid.UUID | None = Query(None),
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = 0,
     db: PostgresRepository = Depends(get_db),
 ):

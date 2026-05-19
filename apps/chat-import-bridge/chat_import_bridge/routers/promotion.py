@@ -33,6 +33,8 @@ async def promote_import(
     body: PromoteRequest = PromoteRequest(),
     db: AsyncSession = Depends(get_session),
 ):
+    if not settings.promotion_enabled:
+        raise HTTPException(status_code=403, detail="Promotion is disabled. Set PROMOTION_ENABLED=true.")
     entry = await svc.get_staged(db, import_id)
     if not entry:
         raise HTTPException(status_code=404, detail="Import not found")
@@ -54,6 +56,8 @@ async def promote_import(
 async def promote_batch(
     db: AsyncSession = Depends(get_session),
 ):
+    if not settings.promotion_enabled:
+        raise HTTPException(status_code=403, detail="Promotion is disabled. Set PROMOTION_ENABLED=true.")
     result = await promote_all_pending(settings.research_agent_url, db_session=db)
     return BatchPromoteResponse(
         total=result["total"],

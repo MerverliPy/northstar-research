@@ -24,7 +24,7 @@ class Neo4jRepository:
         self,
         uri: str = "bolt://localhost:7687",
         user: str = "neo4j",
-        password: str = "northstar",
+        password: str = "",
     ):
         self._uri = uri
         self._user = user

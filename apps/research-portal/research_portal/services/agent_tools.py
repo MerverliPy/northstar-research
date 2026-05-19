@@ -195,8 +195,9 @@ class AgentToolExecutor:
         return r.json()
 
     async def _tool_extract(self, args: dict) -> dict:
+        force = args.get("force", False)
         r = await self.client.post(
-            f"{self._agent_url}/api/v1/extraction/extract?force=true",
+            f"{self._agent_url}/api/v1/extraction/extract?force={'true' if force else 'false'}",
             json={"source_id": args["source_id"]},
         )
         r.raise_for_status()

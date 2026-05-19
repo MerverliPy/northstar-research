@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from typing import Any, TypeVar
@@ -44,31 +45,45 @@ class LLMService:
         models_to_try = [self._primary_model, self._fallback_model]
 
         for model in models_to_try:
-            cached = self._cache.get(prompt, model)
+            cached = self._cache.get(prompt, model, system_prompt, temperature, max_tokens)
             if cached is not None:
                 return cached
 
         last_error: Exception | None = None
 
         for model in models_to_try:
-            try:
-                response = await self._call_ollama(
-                    model=model,
-                    prompt=prompt,
-                    system_prompt=system_prompt,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-                self._cache.set(prompt, model, response)
-                return response
-            except Exception as exc:
-                logger.warning(
-                    "llm_model_failed",
-                    model=model,
-                    error=str(exc),
-                    falling_back=(model == self._primary_model),
-                )
-                last_error = exc
+            for attempt in range(3):
+                try:
+                    response = await self._call_ollama(
+                        model=model,
+                        prompt=prompt,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                    self._cache.set(prompt, model, response, system_prompt, temperature, max_tokens)
+                    return response
+                except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError) as exc:
+                    logger.warning(
+                        "llm_attempt_failed",
+                        model=model,
+                        attempt=attempt + 1,
+                        error=str(exc),
+                    )
+                    if attempt < 2:
+                        await asyncio.sleep(2 ** attempt)
+                    else:
+                        last_error = exc
+                        break
+                except Exception as exc:
+                    logger.warning(
+                        "llm_model_failed",
+                        model=model,
+                        error=str(exc),
+                        falling_back=(model == self._primary_model),
+                    )
+                    last_error = exc
+                    break
 
         raise LLMError(
             f"Both primary ({self._primary_model}) and fallback ({self._fallback_model}) models failed"
@@ -145,6 +160,8 @@ class LLMService:
         return data.get("response", "").strip()
 
     async def close(self) -> None:
+        if self._cache:
+            self._cache.close()
         await self._client.aclose()
 
     async def __aenter__(self) -> LLMService:
@@ -162,7 +179,7 @@ class EmbeddingService:
     ):
         self._model = model
         self._ollama_base_url = ollama_base_url.rstrip("/")
-        self._client = httpx.AsyncClient()
+        self._client = httpx.AsyncClient(timeout=httpx.Timeout(60.0))
 
     async def embed(self, text: str) -> list[float]:
         payload = {

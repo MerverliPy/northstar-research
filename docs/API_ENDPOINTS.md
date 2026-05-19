@@ -3,6 +3,7 @@
 ## Research Agent (port 8099)
 
 All routes prefixed with `/api/v1` unless otherwise noted.
+All list endpoints enforce `limit` query param with `ge=1, le=1000`.
 
 ### Projects
 | Method | Path | Description |
@@ -28,6 +29,7 @@ All routes prefixed with `/api/v1` unless otherwise noted.
 | GET | `/api/v1/entities/` | List entities |
 | POST | `/api/v1/entities/` | Create entity |
 | GET | `/api/v1/entities/{id}` | Get entity by ID |
+| PUT | `/api/v1/entities/{id}` | Update entity |
 | DELETE | `/api/v1/entities/{id}` | Delete entity |
 
 ### Claims
@@ -36,6 +38,7 @@ All routes prefixed with `/api/v1` unless otherwise noted.
 | GET | `/api/v1/claims/` | List claims |
 | POST | `/api/v1/claims/` | Create claim |
 | GET | `/api/v1/claims/{id}` | Get claim by ID |
+| PUT | `/api/v1/claims/{id}` | Update claim |
 | DELETE | `/api/v1/claims/{id}` | Delete claim |
 
 ### Reports
@@ -82,8 +85,8 @@ All routes prefixed with `/api/v1` unless otherwise noted.
 | GET | `/api/v1/imports/{id}` | Get staged import |
 | DELETE | `/api/v1/imports/{id}` | Delete staged import |
 | GET | `/api/v1/export/{id}/markdown` | Export as Markdown |
-| POST | `/api/v1/promotion/{id}` | Promote import to Agent |
-| POST | `/api/v1/promotion/batch` | Promote all pending |
+| POST | `/api/v1/promotion/{id}` | Promote import to Agent (403 unless PROMOTION_ENABLED=true) |
+| POST | `/api/v1/promotion/batch` | Promote all pending (403 unless PROMOTION_ENABLED=true) |
 
 ## Research Portal (port 3010)
 
@@ -98,6 +101,12 @@ All routes prefixed with `/api/v1` unless otherwise noted.
 | GET | `/graph/data/{project_id}` | Graph JSON data |
 | GET | `/api/settings` | Current safety gate settings |
 | POST | `/api/chat` | AI chat orchestrator |
-| ALL | `/api/v1/{path}` | API proxy to research-agent |
+| ALL | `/api/v1/{path}` | API proxy to research-agent (whitelisted headers only) |
+
+## Query Parameters
+
+List endpoints accept:
+- `limit`: integer, 1–1000 (default 50). Values outside range return 422.
+- `offset`: integer (default 0).
 
 Treat this file as an operator reference. Confirm actual routes against the running app before relying on them in automation.

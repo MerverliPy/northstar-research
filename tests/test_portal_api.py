@@ -17,27 +17,36 @@ class TestHealth:
 
 class TestDashboard:
     async def test_dashboard_renders(self, portal_client):
-        pytest.skip("Dashboard needs template rendering with real DB data")
+        response = await portal_client.get("/dashboard")
+        assert response.status_code in (200, 307)
 
 
 class TestQualityPage:
     async def test_quality_page_renders(self, portal_client):
-        pytest.skip("Quality page needs template rendering with real DB data")
+        response = await portal_client.get("/quality")
+        assert response.status_code == 200
+        assert len(response.text) > 0
 
 
 class TestCleanupPage:
     async def test_cleanup_page_renders(self, portal_client):
-        pytest.skip("Cleanup page needs template rendering with real DB data")
+        response = await portal_client.get("/cleanup")
+        assert response.status_code == 200
+        assert len(response.text) > 0
 
 
 class TestExtractionPage:
     async def test_extraction_page_renders(self, portal_client):
-        pytest.skip("Extraction page needs template rendering with real DB data")
+        response = await portal_client.get("/extraction")
+        assert response.status_code == 200
+        assert len(response.text) > 0
 
 
 class TestGraphPage:
     async def test_graph_page_renders(self, portal_client):
-        pytest.skip("Graph page needs template rendering with real DB data")
+        response = await portal_client.get("/visual")
+        assert response.status_code == 200
+        assert len(response.text) > 0
 
 
 class TestSafetyGates:
@@ -50,7 +59,12 @@ class TestSafetyGates:
         assert response.status_code == 403
 
     async def test_extraction_trigger_source_not_found(self, portal_client):
-        pytest.skip("Extraction trigger needs real backend services")
+        sid = uuid.uuid4()
+        response = await portal_client.post(
+            "/api/v1/extraction/extract",
+            json={"source_id": str(sid)},
+        )
+        assert response.status_code in (403, 404, 502, 503)
 
     async def test_cleanup_execute_403(self, portal_client):
         response = await portal_client.post("/api/v1/cleanup/execute")

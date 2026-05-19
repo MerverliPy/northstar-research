@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+command -v pg_dump >/dev/null 2>&1 || { echo "ERROR: pg_dump not found. Install PostgreSQL client tools."; exit 1; }
+
 OUTPUT_DIR="${1:-$HOME/northstar-backups}"
 STAMP="$(date +%Y-%m-%d_%H-%M-%S)"
 BACKUP_FILE="$OUTPUT_DIR/northstar-backup_$STAMP.tar.gz"

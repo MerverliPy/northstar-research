@@ -491,10 +491,11 @@ class PostgresRepository:
             log.entities_found = entities_found
             if error_message is not None:
                 log.error_message = error_message
-            if status in (ExtractionStatus.COMPLETED, ExtractionStatus.FAILED):
-                log.completed_at = datetime.now(timezone.utc)
-            else:
+            if status in (ExtractionStatus.IN_PROGRESS,) and log.status != ExtractionStatus.IN_PROGRESS:
                 log.started_at = datetime.now(timezone.utc)
+            if status in (ExtractionStatus.COMPLETED, ExtractionStatus.FAILED, ExtractionStatus.SKIPPED):
+                if log.completed_at is None:
+                    log.completed_at = datetime.now(timezone.utc)
             await session.commit()
             await session.refresh(log)
             return log
@@ -542,9 +543,7 @@ class PostgresRepository:
                 for e in entities
             ]
             session.add_all(models)
-            await session.commit()
-            for m in models:
-                await session.refresh(m)
+            await session.flush()
             return models
 
     async def bulk_create_claims(
@@ -564,7 +563,5 @@ class PostgresRepository:
                 for c in claims
             ]
             session.add_all(models)
-            await session.commit()
-            for m in models:
-                await session.refresh(m)
+            await session.flush()
             return models

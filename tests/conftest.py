@@ -268,7 +268,7 @@ def agent_client(agent_app):
 def bridge_app(test_settings):
     with patch("chat_import_bridge.database._engine", None), patch(
         "chat_import_bridge.database.init_staging_db", AsyncMock()
-    ):
+    ), patch("chat_import_bridge.config.settings.promotion_enabled", True):
         from chat_import_bridge.main import app
         yield app
 

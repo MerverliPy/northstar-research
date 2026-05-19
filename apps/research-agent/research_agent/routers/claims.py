@@ -14,7 +14,7 @@ router = APIRouter(prefix="/claims", tags=["Claims"])
 async def list_claims(
     source_id: uuid.UUID | None = Query(None),
     entity_id: uuid.UUID | None = Query(None),
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = 0,
     db: PostgresRepository = Depends(get_db),
 ):

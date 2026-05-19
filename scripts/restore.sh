@@ -12,6 +12,10 @@ if [ ! -f "$BACKUP_FILE" ]; then
   exit 1
 fi
 
+echo "WARNING: This will DESTROY the current database."
+read -p "Continue? (y/N) " confirm
+[[ "$confirm" != "y" && "$confirm" != "Y" ]] && echo "Aborted." && exit 1
+
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 

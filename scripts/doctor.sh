@@ -55,7 +55,7 @@ else
   fail=1
 fi
 
-for pkg in northstar-db northstar-llm northstar-models northstar-vector; do
+for pkg in northstar_db northstar_llm northstar_models northstar_vector; do
   if python3 -c "import $pkg" 2>/dev/null; then
     printf 'ok   package %s importable\n' "$pkg"
   else

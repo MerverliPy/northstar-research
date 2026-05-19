@@ -106,6 +106,29 @@ If extraction returns 403, either set `FORCE_GRAPH_EXTRACTION=true` in `.env` or
 python tools/extract.py <source-id> --force
 ```
 
+### PROMOTION_ENABLED gate
+
+If promotion endpoints return 403, set `PROMOTION_ENABLED=true` in the bridge's environment:
+
+```bash
+# In apps/chat-import-bridge/.env:
+PROMOTION_ENABLED=true
+```
+
+### LLM retries and timeouts
+
+LLMService uses 3-retry exponential backoff for transient errors (TimeoutException, ConnectError, ReadError). If you see repeated `llm_attempt_failed` log warnings:
+- Verify Ollama is responsive: `ollama list`
+- Check model is pulled: `ollama pull qwen3:14b`
+- The service will automatically fall back from primary model (qwen3:14b) to fallback (llama3.1:8b)
+
+### Embedding timeout
+
+EmbeddingService has a 60-second httpx timeout. Large batch operations may need longer. If you see `ReadTimeout` errors on embedding:
+- Reduce batch size
+- Check Ollama GPU memory availability
+- Verify embedding model is pulled: `ollama pull nomic-embed-text`
+
 ## Database connection issues
 
 ### PostgreSQL unreachable
@@ -137,6 +160,20 @@ Check Docker container:
 docker ps | grep northstar-neo4j
 docker compose -f docker/docker-compose.yml logs neo4j
 ```
+
+### Neo4j authentication failure
+
+If you see authentication errors, verify the password is explicitly set:
+- The Neo4j repo has no hardcoded default — it must be configured.
+- Set `NEO4J_PASSWORD` in your `.env` file to match `docker-compose.yml` `NEO4J_AUTH`.
+- In `docker-compose.yml`, the default is `neo4j/northstar`.
+
+### REST API 422 on list endpoints
+
+If you receive HTTP 422 on a list endpoint, check the `limit` parameter:
+- All list endpoints enforce `limit` between 1 and 1000.
+- Values outside this range (including 0 or 99999) return 422.
+- Default is 50. Use `?limit=100` or any value in [1, 1000].
 
 ## Vector store corruption recovery
 

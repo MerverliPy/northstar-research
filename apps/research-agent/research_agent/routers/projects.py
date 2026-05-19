@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from northstar_db import PostgresRepository
 from northstar_models import ProjectCreate, ProjectRead, ProjectUpdate
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 
 @router.get("/", response_model=list[ProjectRead])
 async def list_projects(
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = 0,
     db: PostgresRepository = Depends(get_db),
 ):

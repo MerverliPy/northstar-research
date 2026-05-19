@@ -58,7 +58,7 @@ See `docs/CLI.md` for full reference.
 | `POSTGRES_DB` | `northstar` | PostgreSQL database name |
 | `NEO4J_URI` | `bolt://127.0.0.1:7687` | Neo4j bolt URI |
 | `NEO4J_USER` | `neo4j` | Neo4j user |
-| `NEO4J_PASSWORD` | `northstar` | Neo4j password |
+| `NEO4J_PASSWORD` | *(none)* | Neo4j password — must be explicitly set |
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama server URL |
 | `PRIMARY_LLM_MODEL` | `qwen3:14b` | Primary LLM model for extraction |
 | `FALLBACK_LLM_MODEL` | `llama3.1:8b` | Fallback LLM model |
@@ -66,6 +66,7 @@ See `docs/CLI.md` for full reference.
 | `CHROMA_PERSIST_DIR` | `~/.cache/northstar/chromadb` | ChromaDB persistence directory |
 | `FORCE_GRAPH_EXTRACTION` | `false` | Allow extraction without force flag |
 | `ENABLE_DESTRUCTIVE_CLEANUP` | `false` | Allow destructive cleanup operations |
+| `PROMOTION_ENABLED` | `false` | Enable chat-import promotion to Agent |
 | `LOG_LEVEL` | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
 
 ## Logging configuration
@@ -97,3 +98,16 @@ Stop and inspect before continuing when:
 - Quality score falls below the configured minimum.
 - Cleanup reports unexpectedly show duplicate or orphan candidates after a clean baseline.
 - Any command proposes destructive cleanup without an explicit reviewed migration.
+- Any promotion endpoint returns 403 (check `PROMOTION_ENABLED` flag).
+- `restore.sh` prompts for confirmation — review before proceeding.
+
+## Docker-compose hardening
+
+Services in `docker/docker-compose.yml`:
+- Both PostgreSQL and Neo4j use `restart: unless-stopped`.
+- Neo4j has a healthcheck (`neo4j status`) with 30s start period.
+- Containers run as non-root where applicable.
+
+## API query limits
+
+All agent list endpoints enforce `limit` values between 1 and 1000. Requests with `limit` outside this range return HTTP 422. Default limit is 50 per endpoint.

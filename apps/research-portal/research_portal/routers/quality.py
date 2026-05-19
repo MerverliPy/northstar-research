@@ -1,19 +1,14 @@
 import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from jinja2 import Environment, FileSystemLoader
-from pathlib import Path
 
 from northstar_db import PostgresRepository
 
 from research_portal.dependencies import get_db
 from research_portal.config import settings
+from research_portal.template_utils import env
 
 router = APIRouter(tags=["Quality"])
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-TEMPLATE_DIR = BASE_DIR / "templates"
-env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
 
 
 @router.get("/", response_class=HTMLResponse)

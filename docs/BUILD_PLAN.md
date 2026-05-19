@@ -104,9 +104,13 @@ Compiled into every layer of the system:
 1. **PostgreSQL** is source of truth. Neo4j is derived.
 2. `FORCE_GRAPH_EXTRACTION=false` by default — extraction returns 403 unless explicitly enabled
 3. `ENABLE_DESTRUCTIVE_CLEANUP=false` by default — cleanup is read-only/dry-run
-4. Existing graphs are skipped by default
-5. Chat Import Bridge never mutates PG or Neo4j before explicit promotion
-6. All destructive actions require backup validation + explicit flag
+4. `PROMOTION_ENABLED=false` by default — chat-import promotion returns 403 unless enabled
+5. Existing graphs are skipped by default
+6. Chat Import Bridge never mutates PG or Neo4j before explicit promotion
+7. All destructive actions require backup validation + explicit flag
+8. Docker containers run as non-root `appuser`
+9. Docker-compose services use `restart: unless-stopped` with Neo4j healthcheck
+10. `restore.sh` prompts for confirmation; `backup.sh` checks for `pg_dump` availability
 
 ---
 
@@ -226,4 +230,5 @@ LLM_TASK_CLASSIFICATION_MODEL=llama3.1:8b
 # Safety
 FORCE_GRAPH_EXTRACTION=false
 ENABLE_DESTRUCTIVE_CLEANUP=false
+PROMOTION_ENABLED=false
 ```

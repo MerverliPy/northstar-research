@@ -254,6 +254,7 @@ Active route highlighted with `bg-[#e94560]/10 text-[#e94560] border-r-2 border-
 │ ┌────────────────────────────────┐ │
 │ │ Force Graph Extraction  DISABLED│ │  ← gate status
 │ │ Destructive Cleanup     DISABLED│ │
+│ │ Promotion Enabled       DISABLED│ │
 │ └────────────────────────────────┘ │
 │                                    │
 │ Service Endpoints                  │
@@ -284,6 +285,14 @@ Active route highlighted with `bg-[#e94560]/10 text-[#e94560] border-r-2 border-
 | `ToastContainer` | none | Fixed bottom-right stack of auto-dismiss notifications, rendered from `toastStore` |
 
 ---
+
+## Portal Architecture Notes
+
+The portal proxies agent API calls through `routers/api_proxy.py`:
+- The agent base URL includes `/api/v1` prefix.
+- Only safe headers (accept, accept-encoding, user-agent) are forwarded.
+- 503 is returned when the agent is unreachable.
+- Portal routers import a shared Jinja2 template environment from `template_utils.py`.
 
 ## State Management
 

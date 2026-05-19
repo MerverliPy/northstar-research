@@ -46,11 +46,24 @@ GET  /api/chat-imports/{id}/export
 POST /api/chat-imports/{id}/status
 ```
 
+## Promotion safety gate
+
+Promotion endpoints (`/api/v1/promotion/{id}` and `/api/v1/promotion/batch`) are gated behind the `PROMOTION_ENABLED` environment variable (defaults to `false`). When disabled, both endpoints return HTTP 403.
+
+To enable promotion:
+
+```bash
+export PROMOTION_ENABLED=true
+# or set in apps/chat-import-bridge/.env:
+PROMOTION_ENABLED=true
+```
+
 ## Promotion guardrails
 
 Before a staged transcript becomes a research project:
 
 - Confirm the transcript is worth preserving.
+- Enable `PROMOTION_ENABLED=true` in the bridge configuration.
 - Add a clear topic and notes.
 - Generate a Markdown export packet.
 - Promote into PostgreSQL through an explicit reviewed path.

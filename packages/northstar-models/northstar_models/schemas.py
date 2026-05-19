@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from northstar_models.enums import (
     EntityType,
@@ -85,20 +85,10 @@ class EntityCreate(BaseModel):
     source_id: Optional[uuid.UUID] = None
     name: str
     entity_type: EntityType
-    aliases: Optional[dict[str, Any]] = None
+    aliases: Optional[list[str]] = None
     description: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
-    confidence: Optional[float] = None
-
-
-class EntityUpdate(BaseModel):
-    source_id: Optional[uuid.UUID] = None
-    name: Optional[str] = None
-    entity_type: Optional[EntityType] = None
-    aliases: Optional[dict[str, Any]] = None
-    description: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
 
 
 class EntityRead(BaseModel):
@@ -106,14 +96,24 @@ class EntityRead(BaseModel):
     source_id: Optional[uuid.UUID] = None
     name: str
     entity_type: EntityType
-    aliases: Optional[dict[str, Any]] = None
+    aliases: Optional[list[str]] = None
     description: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class EntityUpdate(BaseModel):
+    source_id: Optional[uuid.UUID] = None
+    name: Optional[str] = None
+    entity_type: Optional[EntityType] = None
+    aliases: Optional[list[str]] = None
+    description: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
 
 
 class ClaimCreate(BaseModel):
@@ -121,7 +121,7 @@ class ClaimCreate(BaseModel):
     entity_id: Optional[uuid.UUID] = None
     claim_text: str
     claim_type: Optional[str] = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
     context: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
 
@@ -131,7 +131,7 @@ class ClaimUpdate(BaseModel):
     entity_id: Optional[uuid.UUID] = None
     claim_text: Optional[str] = None
     claim_type: Optional[str] = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
     context: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
 
@@ -142,7 +142,7 @@ class ClaimRead(BaseModel):
     entity_id: Optional[uuid.UUID] = None
     claim_text: str
     claim_type: Optional[str] = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
     context: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
     created_at: datetime
@@ -185,7 +185,7 @@ class AnalysisCreate(BaseModel):
     analysis_type: str
     content: dict[str, Any]
     model_used: Optional[str] = None
-    quality_score: Optional[float] = None
+    quality_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     metadata: Optional[dict[str, Any]] = None
 
 
@@ -195,7 +195,7 @@ class AnalysisUpdate(BaseModel):
     analysis_type: Optional[str] = None
     content: Optional[dict[str, Any]] = None
     model_used: Optional[str] = None
-    quality_score: Optional[float] = None
+    quality_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     metadata: Optional[dict[str, Any]] = None
 
 
@@ -206,12 +206,27 @@ class AnalysisRead(BaseModel):
     analysis_type: str
     content: dict[str, Any]
     model_used: Optional[str] = None
-    quality_score: Optional[float] = None
+    quality_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     metadata: Optional[dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ExtractionLogCreate(BaseModel):
+    source_id: uuid.UUID
+    project_id: uuid.UUID
+    status: ExtractionStatus = ExtractionStatus.PENDING
+    entities_found: int = 0
+    metadata: Optional[dict[str, Any]] = None
+
+
+class ExtractionLogUpdate(BaseModel):
+    status: Optional[ExtractionStatus] = None
+    entities_found: Optional[int] = None
+    error_message: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
 
 
 class ExtractionLogRead(BaseModel):
@@ -266,7 +281,7 @@ class SearchResult(BaseModel):
     content: str
     score: float
     metadata: dict[str, Any]
-    source_id: uuid.UUID
+    source_id: uuid.UUID | None = None
 
 
 class CleanupReport(BaseModel):

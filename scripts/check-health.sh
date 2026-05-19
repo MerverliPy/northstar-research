@@ -42,11 +42,12 @@ else
 fi
 
 if command -v curl >/dev/null 2>&1; then
-  if curl -fsS --max-time 5 http://127.0.0.1:7687/ >/dev/null 2>&1 || \
-     curl -fsS --max-time 5 http://127.0.0.1:7474/ >/dev/null 2>&1; then
-    echo "ok   Neo4j reachable (HTTP bolt/UI port)"
+  if curl -fsS --max-time 5 http://127.0.0.1:7474/ >/dev/null 2>&1; then
+    echo "ok   Neo4j reachable (HTTP UI port 7474)"
+  elif command -v nc >/dev/null 2>&1 && nc -z 127.0.0.1 7687 2>/dev/null; then
+    echo "ok   Neo4j reachable (Bolt port 7687)"
   else
-    echo "FAIL Neo4j not reachable on ports 7687 or 7474"
+    echo "FAIL Neo4j not reachable on ports 7474 or 7687"
     fail=1
   fi
 fi

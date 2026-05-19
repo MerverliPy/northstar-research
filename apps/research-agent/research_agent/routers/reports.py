@@ -13,7 +13,7 @@ router = APIRouter(prefix="/reports", tags=["Reports"])
 @router.get("/", response_model=list[ReportRead])
 async def list_reports(
     project_id: uuid.UUID = Query(...),
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = 0,
     db: PostgresRepository = Depends(get_db),
 ):

@@ -82,15 +82,22 @@ class VectorStore:
         documents_text: list[str] = []
         embeddings: list[list[float]] | None = []
 
-        for doc in documents:
+        docs_without_emb: list[int] = []
+        for i, doc in enumerate(documents):
             ids.append(doc.id)
             metadatas.append({**doc.metadata, "source_id": doc.source_id, "project_id": doc.project_id})
             documents_text.append(doc.text)
             if doc.embedding is not None:
                 embeddings.append(doc.embedding)
             else:
-                emb = await self._embedding_service.embed(doc.text)
-                embeddings.append(emb)
+                docs_without_emb.append(i)
+                embeddings.append([])
+
+        if docs_without_emb:
+            texts_to_embed = [documents[i].text for i in docs_without_emb]
+            batch_embs = await self._embedding_service.embed_batch(texts_to_embed)
+            for idx, i in enumerate(docs_without_emb):
+                embeddings[i] = batch_embs[idx]
 
         if any(e is None for e in embeddings):
             raise VectorStoreError("Failed to generate embeddings for one or more documents")
@@ -174,7 +181,7 @@ class VectorStore:
 
         for i in range(len(ids_batch)):
             doc_id = ids_batch[i]
-            score = 1.0 - distances[i] if distances else 0.0
+            score = max(0.0, 1.0 - distances[i] / 2.0) if distances else 0.0
             text = documents_text_batch[i] if documents_text_batch else ""
             meta = metadatas_batch[i] if metadatas_batch else {}
             search_results.append(
@@ -329,7 +336,12 @@ class VectorStore:
             return False
 
         try:
-            await asyncio.to_thread(self._client.heartbeat)
+            await asyncio.to_thread(self._client.list_collections)
             return True
         except Exception:
             return False
+
+    async def close(self) -> None:
+        if self._client is not None:
+            self._client = None
+            logger.info("vector_store_closed")

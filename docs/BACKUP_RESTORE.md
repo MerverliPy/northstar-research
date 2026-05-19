@@ -10,12 +10,29 @@ Run backups before:
 - Data cleanup
 - New destructive migration tooling
 
-## Example commands
+## Backup script (`scripts/backup.sh`)
 
 ```bash
-./backup-local-ai-research.sh
-~/upgrade-neo4j-export-restore-drill.sh
+./scripts/backup.sh [output-dir]
 ```
+
+The script:
+- Checks for `pg_dump` availability and exits with clear error if missing.
+- Dumps PostgreSQL (custom format) and copies ChromaDB data.
+- Creates a compressed tar archive with timestamp.
+- Default output: `~/northstar-backups/`.
+
+## Restore script (`scripts/restore.sh`)
+
+```bash
+./scripts/restore.sh <backup-file>
+```
+
+The script:
+- **Prompts for confirmation** before destroying the current database.
+- Requires explicit `y`/`Y` to proceed; anything else aborts.
+- Restores PostgreSQL with `pg_restore --clean --if-exists`.
+- Restores ChromaDB data if present in the backup.
 
 ## Restore acceptance criteria
 

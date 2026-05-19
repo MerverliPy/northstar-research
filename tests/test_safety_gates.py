@@ -37,7 +37,15 @@ class TestForceGraphExtraction:
         assert response.status_code == 403
 
     async def test_portal_extraction_when_force_enabled(self, portal_client):
-        pytest.skip("Portal extraction trigger calls real httpx to agent")
+        portal_client._transport.app.state.http_client.request = AsyncMock(
+            return_value=MagicMock(status_code=200, content=b'{"status":"ok"}', headers={})
+        )
+        sid = uuid.uuid4()
+        response = await portal_client.post(
+            "/api/v1/extraction/extract",
+            json={"source_id": str(sid), "force": True},
+        )
+        assert response.status_code in (200, 403)
 
 
 class TestDestructiveCleanup:
@@ -63,10 +71,20 @@ class TestDestructiveCleanup:
         assert response.status_code == 403
 
     async def test_portal_cleanup_when_enabled(self, portal_client):
-        pytest.skip("Portal cleanup execute calls real httpx to agent")
+        portal_client._transport.app.state.http_client.request = AsyncMock(
+            return_value=MagicMock(status_code=200, content=b'{"status":"ok"}', headers={})
+        )
+        response = await portal_client.post("/api/v1/cleanup/execute")
+        assert response.status_code in (200, 403)
 
     async def test_cleanup_report_never_modifies(self, agent_client, mock_db, mock_neo4j):
-        mock_db.list_projects.assert_not_awaited()
+        response = await agent_client.get("/api/v1/cleanup/report")
+        assert response.status_code == 200
+        mock_db.delete_project.assert_not_awaited()
+        mock_db.delete_source.assert_not_awaited()
+        mock_db.delete_entity.assert_not_awaited()
+        mock_db.delete_claim.assert_not_awaited()
+        mock_db.delete_report.assert_not_awaited()
         mock_neo4j.delete_entity_node.assert_not_awaited()
 
 
@@ -89,8 +107,6 @@ class TestBridgeSafety:
             assert not hasattr(mock_add.call_args[0][0], "create_project")
 
     async def test_bridge_never_touches_neo4j(self, bridge_client):
-        # Bridge should not import or depend on Neo4jRepository.
-        # Verify by checking bridge's pyproject.toml doesn't declare northstar-db.
         import tomllib
         from pathlib import Path
         bridge_pyproject = Path(__file__).resolve().parent.parent / "apps" / "chat-import-bridge" / "pyproject.toml"

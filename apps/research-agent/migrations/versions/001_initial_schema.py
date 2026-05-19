@@ -60,6 +60,7 @@ def upgrade() -> None:
         sa.Column("metadata", postgresql.JSON(), nullable=True),
         sa.Column("confidence", sa.Float(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["source_id"],
@@ -77,6 +78,7 @@ def upgrade() -> None:
         sa.Column("context", sa.Text(), nullable=True),
         sa.Column("metadata", postgresql.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["source_id"],
@@ -114,6 +116,7 @@ def upgrade() -> None:
         sa.Column("quality_score", sa.Float(), nullable=True),
         sa.Column("metadata", postgresql.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["source_id"],
@@ -136,6 +139,7 @@ def upgrade() -> None:
         sa.Column("entities_found", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.Column("metadata", postgresql.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["source_id"],

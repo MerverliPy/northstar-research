@@ -31,7 +31,7 @@ async def score_source_quality(
 @router.get("/history", response_model=list[AnalysisRead])
 async def list_quality_history(
     source_id: uuid.UUID | None = Query(None),
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = 0,
     db: PostgresRepository = Depends(get_db),
 ):
