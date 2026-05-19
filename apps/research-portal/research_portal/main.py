@@ -257,6 +257,16 @@ async def api_v1_handler(request: Request, path: str):
     if path.rstrip("/") == "claims":
         return paginated_response([], 0, limit, offset)
 
+    # ── Graph data ── (query Neo4j directly)
+    if path.startswith("graph/data/"):
+        project_id = path.split("/")[-1]
+        try:
+            neo4j = await anext(get_neo4j())
+            graph_data = await neo4j.get_project_graph(project_id)
+            return graph_data
+        except Exception:
+            return {"nodes": [], "edges": []}
+
     # ── Generic passthrough for other /api/v1/ paths ──
     target_url = f"{agent_base}/{path}"
     if request.url.query:
