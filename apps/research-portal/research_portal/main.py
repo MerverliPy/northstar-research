@@ -312,6 +312,9 @@ async def health():
 
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
+    file_path = STATIC_DIR / full_path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(str(file_path))
     index_path = STATIC_DIR / "index.html"
     if index_path.exists():
         return FileResponse(index_path)

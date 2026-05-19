@@ -49,6 +49,14 @@ export function ToastContainer() {
               {style.icon}
             </span>
             <span className="text-sm flex-1 truncate">{toast.message}</span>
+            {toast.action && (
+              <button
+                onClick={() => { toast.action!.onClick(); dismissToast(toast.id) }}
+                className="flex-shrink-0 bg-white/15 hover:bg-white/25 text-white rounded px-2 py-1 text-xs font-medium transition-colors"
+              >
+                {toast.action.label}
+              </button>
+            )}
             <button
               onClick={() => dismissToast(toast.id)}
               className="flex-shrink-0 text-white/60 hover:text-white ml-1 w-5 h-5 rounded flex items-center justify-center text-xs transition-colors"
