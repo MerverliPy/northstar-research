@@ -6,9 +6,19 @@ import App from './App'
 // Skeleton fallback for lazy-loaded views
 function ViewSkeleton() {
   return (
-    <div className="flex flex-col h-full overflow-y-auto p-6 animate-pulse">
-      <div className="h-8 w-48 skeleton rounded mb-6" />
-      <div className="h-64 skeleton rounded-lg" />
+    <div className="flex-1 flex flex-col">
+      <div className="h-14 border-b flex items-center px-6" style={{ borderColor: 'var(--color-northstar-border)' }}>
+        <div className="h-5 w-40 rounded animate-pulse" style={{ backgroundColor: 'var(--color-northstar-surface)' }} />
+      </div>
+      <div className="p-6 space-y-4">
+        {[1, 2, 3].map(i => (
+          <div
+            key={i}
+            className="h-24 rounded-lg border animate-pulse"
+            style={{ backgroundColor: 'var(--color-northstar-surface)', borderColor: 'var(--color-northstar-border)' }}
+          />
+        ))}
+      </div>
     </div>
   )
 }

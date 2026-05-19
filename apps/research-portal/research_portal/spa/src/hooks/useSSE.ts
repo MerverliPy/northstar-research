@@ -10,7 +10,10 @@ interface UseSSEOptions {
 export function useSSE(url: string | null, options: UseSSEOptions) {
   const eventSourceRef = useRef<EventSource | null>(null)
   const optionsRef = useRef(options)
-  optionsRef.current = options
+
+  useEffect(() => {
+    optionsRef.current = options
+  })
 
   const close = useCallback(() => {
     if (eventSourceRef.current) {

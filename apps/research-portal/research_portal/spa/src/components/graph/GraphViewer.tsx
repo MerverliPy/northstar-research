@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useProjectStore } from '../../stores/projectStore'
 import { Card } from '../shared/Card'
 import type { GraphData } from '../../types'
@@ -35,7 +35,7 @@ export function GraphViewer() {
     fetchProjects()
   }, [fetchProjects])
 
-  const loadGraph = async (projectId: string) => {
+  const loadGraph = useCallback(async (projectId: string) => {
     setLoading(true)
     setError(null)
     try {
@@ -104,14 +104,13 @@ export function GraphViewer() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (selectedProject) {
-      loadGraph(selectedProject)
+      void Promise.resolve().then(() => { loadGraph(selectedProject) })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProject])
+  }, [selectedProject, loadGraph])
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-6">

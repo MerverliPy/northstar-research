@@ -116,7 +116,7 @@ export function SourcesView() {
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New Source">
-        <div className="space-y-4">
+        <form className="space-y-4" noValidate onSubmit={(e) => { e.preventDefault(); handleSubmit() }}>
           <div>
             <label htmlFor="source-title" className="block text-sm text-[#8888aa] mb-1">Title</label>
             <input
@@ -159,9 +159,9 @@ export function SourcesView() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} loading={submitting}>Create</Button>
+            <Button type="submit" loading={submitting}>Create</Button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   )

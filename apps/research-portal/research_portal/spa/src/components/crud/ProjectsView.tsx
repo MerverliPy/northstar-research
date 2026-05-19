@@ -88,7 +88,7 @@ export function ProjectsView() {
           data={projects}
           keyField="id"
           loading={loading}
-          emptyMessage="No projects yet"
+          emptyMessage={!navigator.onLine ? 'You\'re offline — connect to view projects' : 'No projects yet'}
           emptyAction={
             <Button size="sm" onClick={openCreate}>
               Create your first project
@@ -106,7 +106,7 @@ export function ProjectsView() {
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Project' : 'New Project'}>
-        <div className="space-y-4" noValidate>
+        <form className="space-y-4" noValidate onSubmit={(e) => { e.preventDefault(); handleSubmit() }}>
           <div>
             <label htmlFor="project-name" className="block text-sm text-[#8888aa] mb-1">Name</label>
             <input
@@ -135,11 +135,11 @@ export function ProjectsView() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} loading={submitting}>
+            <Button type="submit" loading={submitting}>
               {editing ? 'Update' : 'Create'}
             </Button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   )

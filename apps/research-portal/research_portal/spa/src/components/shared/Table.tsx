@@ -157,6 +157,13 @@ export function Table<T extends Record<string, any>>({
                 onClick={() => {
                   if (col.key !== '') handleSort(col.key)
                 }}
+                onKeyDown={col.key !== '' ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleSort(col.key)
+                  }
+                } : undefined}
+                tabIndex={col.key !== '' ? 0 : undefined}
                 role="columnheader"
                 aria-sort={
                   sort.key === col.key

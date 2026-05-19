@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useThemeStore } from '../stores/themeStore'
+import { useInstallPrompt } from '../hooks/useInstallPrompt'
 
 interface NavLinkDef {
   to: string
@@ -57,9 +58,55 @@ const links: NavLinkDef[] = [
   },
 ]
 
+function InstallButton({ collapsed }: { collapsed: boolean }) {
+  const { isInstallable, promptInstall } = useInstallPrompt()
+
+  if (!isInstallable) return null
+
+  return (
+    <div className="border-t p-2" style={{ borderColor: 'var(--color-sidebar-border)' }}>
+      <button
+        onClick={promptInstall}
+        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-md transition-colors ${
+          collapsed ? 'justify-center px-0' : ''
+        }`}
+        style={{ color: 'var(--color-sidebar-text)' }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-sidebar-hover)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '' }}
+        aria-label="Install app"
+        title="Install Northstar as an app"
+      >
+        <svg className="w-[18px] h-[18px] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        {!collapsed && <span>Install App</span>}
+      </button>
+    </div>
+  )
+}
+
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const { resolved: theme, toggleTheme } = useThemeStore()
+
+  // Auto-collapse sidebar on narrow viewports (<=768px), auto-expand on wider
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+
+    const handleChange = (e: MediaQueryListEvent | { matches: boolean }) => {
+      if (e.matches) {
+        setCollapsed(true)
+      } else {
+        setCollapsed(false)
+      }
+    }
+
+    handleChange(mq)
+    mq.addEventListener('change', handleChange)
+    return () => mq.removeEventListener('change', handleChange)
+  }, [])
 
   return (
     <aside
@@ -97,7 +144,7 @@ export function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors group relative ${
                 isActive
-                  ? 'bg-[#e94560]/10 text-[#e94560] border-l-2 border-[#e94560]'
+                  ? 'bg-[#e94560]/10 text-[#e94560] border-r-2 border-[#e94560]'
                   : ''
               } ${collapsed ? 'justify-center px-0' : ''}`
             }
@@ -124,8 +171,11 @@ export function Sidebar() {
         ))}
       </nav>
 
+      {/* Install button */}
+      <InstallButton collapsed={collapsed} />
+
       {/* Theme toggle */}
-      <div className="border-t p-2" style={{ borderColor: 'var(--color-sidebar-border)' }}>
+      <div className="border-t p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]" style={{ borderColor: 'var(--color-sidebar-border)' }}>
         <button
           onClick={toggleTheme}
           className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-md transition-colors ${

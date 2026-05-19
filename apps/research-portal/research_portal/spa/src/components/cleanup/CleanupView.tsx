@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card } from '../shared/Card'
 import { Button } from '../shared/Button'
 import { Badge } from '../shared/Badge'
@@ -13,13 +13,7 @@ export function CleanupView() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchSettings()
-    fetchReport()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchSettings])
-
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -32,7 +26,12 @@ export function CleanupView() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchSettings()
+    void Promise.resolve().then(() => { fetchReport() })
+  }, [fetchSettings, fetchReport])
 
   const executeCleanup = async () => {
     if (!settings.enable_destructive_cleanup) return
@@ -72,7 +71,7 @@ export function CleanupView() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card variant="surface" hover>
           <div className="text-xs uppercase tracking-wider text-[#8888aa] mb-1">Orphaned Entities</div>
           {loading && !report ? (

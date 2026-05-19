@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card } from '../shared/Card'
 import { Button } from '../shared/Button'
 import { Badge } from '../shared/Badge'
@@ -17,7 +17,7 @@ export function ImportView() {
   const [batchPromoting, setBatchPromoting] = useState(false)
   const [result, setResult] = useState<string | null>(null)
 
-  const fetchImports = async () => {
+  const fetchImports = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`${BRIDGE_URL}s/?limit=100`)
@@ -30,12 +30,11 @@ export function ImportView() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchImports()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    void Promise.resolve().then(() => { fetchImports() })
+  }, [fetchImports])
 
   const handlePaste = async () => {
     if (!form.content.trim()) return
@@ -155,8 +154,9 @@ export function ImportView() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Paste Chat Import">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Title</label>
+            <label htmlFor="import-title" className="block text-sm text-[#8888aa] mb-1">Title</label>
             <input
+              id="import-title"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors"
@@ -164,8 +164,9 @@ export function ImportView() {
             />
           </div>
           <div>
-            <label className="block text-sm text-[#8888aa] mb-1">Content</label>
+            <label htmlFor="import-content" className="block text-sm text-[#8888aa] mb-1">Content</label>
             <textarea
+              id="import-content"
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               className="w-full bg-[#1a1a2e] border border-[#2a2a4a] rounded-md px-3 py-2 text-sm text-white placeholder-[#8888aa] focus:outline-none focus:border-[#e94560] transition-colors resize-none"

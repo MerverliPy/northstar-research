@@ -38,6 +38,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask the AI Researcher anything…"
+          aria-label="Ask a research question"
           className="flex-1 bg-[#16213e] border border-[#2a2a4a] rounded-lg px-4 py-3 text-sm text-[#e0e0e0] placeholder-[#8888aa] resize-none focus:outline-none focus:border-[#e94560] transition-colors disabled:opacity-50"
           rows={rows}
           disabled={disabled}

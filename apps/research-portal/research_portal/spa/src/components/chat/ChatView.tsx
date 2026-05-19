@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useChatStore } from '../../stores/chatStore'
 import { useSSE } from '../../hooks/useSSE'
 import { MessageBubble } from './MessageBubble'
@@ -26,8 +26,8 @@ export function ChatView() {
   } = useChatStore()
 
   const scrollRef = useRef<HTMLDivElement>(null)
-  const sseUrlRef = useRef<string | null>(null)
   const assistantMessageIdRef = useRef<string | null>(null)
+  const [sseUrl, setSseUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!activeConversationId && conversations.length === 0) {
@@ -69,7 +69,7 @@ export function ChatView() {
 
       case 'done': {
         setStreaming(false)
-        sseUrlRef.current = null
+        setSseUrl(null)
 
         if (assistantMessageIdRef.current && currentActions.length > 0) {
           const msg = useChatStore.getState().messages.find(
@@ -94,17 +94,17 @@ export function ChatView() {
 
       case 'error':
         setStreaming(false)
-        sseUrlRef.current = null
+        setSseUrl(null)
         appendMessageContent(`\nError: ${JSON.stringify(event.data)}`)
         break
     }
   }, [addAction, updateAction, setThinkingText, appendMessageContent, setStreaming, clearCurrentActions, currentActions.length])
 
-  useSSE(sseUrlRef.current, {
+  useSSE(sseUrl, {
     onEvent: handleSSEEvent,
     onError: () => {
       setStreaming(false)
-      sseUrlRef.current = null
+      setSseUrl(null)
     },
   })
 
@@ -149,7 +149,7 @@ export function ChatView() {
     params.set('message', text)
     if (activeConversationId) params.set('conversation_id', activeConversationId)
 
-    sseUrlRef.current = `/api/chat/orchestrate?${params.toString()}`
+    setSseUrl(`/api/chat/orchestrate?${params.toString()}`)
   }
 
   return (

@@ -8,10 +8,11 @@ export function usePWA() {
 
   const reloadWithUpdate = useCallback(() => {
     const wb = wbRef.current
-    if (wb) {
-      wb.messageSkipWaiting()
-    }
-    window.location.reload()
+    if (!wb) return
+    wb.addEventListener('controlling', () => {
+      window.location.reload()
+    })
+    wb.messageSkipWaiting()
   }, [])
 
   useEffect(() => {
