@@ -9,7 +9,8 @@ import pytest
 from northstar_llm.cache import LLMResponseCache
 from northstar_llm.service import EmbeddingService, LLMError, LLMService
 
-pytestmark = pytest.mark.asyncio
+# Module-level mark removed to avoid warnings on sync-only classes.
+# Each async class has its own pytestmark.
 
 
 class TestLLMServiceConfig:
@@ -99,6 +100,8 @@ class TestLLMResponseCache:
 
 
 class TestLLMServiceGenerate:
+    pytestmark = pytest.mark.asyncio
+
     async def test_generate_success(self):
         import tempfile
         svc = LLMService(ollama_base_url="http://test:11434")
@@ -189,6 +192,8 @@ class TestLLMServiceGenerate:
 
 
 class TestLLMServiceGenerateStructured:
+    pytestmark = pytest.mark.asyncio
+
     async def test_generate_structured_parses_json(self):
         import tempfile
         svc = LLMService(ollama_base_url="http://test:11434")
@@ -264,6 +269,8 @@ class TestLLMServiceGenerateStructured:
 
 
 class TestLLMServiceIsAvailable:
+    pytestmark = pytest.mark.asyncio
+
     async def test_is_available_true(self):
         svc = LLMService(ollama_base_url="http://test:11434")
 
@@ -293,6 +300,8 @@ class TestLLMServiceIsAvailable:
 
 
 class TestEmbeddingService:
+    pytestmark = pytest.mark.asyncio
+
     async def test_default_config(self):
         svc = EmbeddingService()
         assert svc._model == "nomic-embed-text"
@@ -345,6 +354,8 @@ class TestEmbeddingService:
 
 
 class TestLLMServiceContextManager:
+    pytestmark = pytest.mark.asyncio
+
     async def test_async_context_manager(self):
         svc = LLMService(ollama_base_url="http://test:11434")
         svc._client.aclose = AsyncMock()

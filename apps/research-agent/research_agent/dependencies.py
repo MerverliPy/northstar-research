@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING
 
 from structlog import get_logger
 
 from northstar_db import Neo4jRepository, PostgresRepository
+
+if TYPE_CHECKING:
+    from research_agent.services.scraper import WebScraper
 from northstar_llm import EmbeddingService, LLMService
 from northstar_vector import VectorStore
 
@@ -15,12 +21,12 @@ _llm: LLMService | None = None
 _embedding: EmbeddingService | None = None
 _vector_store: VectorStore | None = None
 _neo4j: Neo4jRepository | None = None
-_scraper: "WebScraper | None" = None
+_scraper: WebScraper | None = None
 
 
-def _import_scraper():
-    from research_agent.services.scraper import WebScraper  # noqa: F401
-    return WebScraper
+def _import_scraper() -> type[WebScraper]:
+    from research_agent.services.scraper import WebScraper as _WebScraper
+    return _WebScraper
 
 
 async def init_services(settings: Settings) -> None:
@@ -106,7 +112,7 @@ async def get_neo4j() -> AsyncGenerator[Neo4jRepository, None]:
     yield _neo4j
 
 
-async def get_scraper() -> "AsyncGenerator[WebScraper, None]":
+async def get_scraper() -> AsyncGenerator[WebScraper, None]:
     if _scraper is None:
         from fastapi import HTTPException
 

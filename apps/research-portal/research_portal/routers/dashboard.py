@@ -11,7 +11,7 @@ router = APIRouter(tags=["Dashboard"])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
-env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
+env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
 
 
 @router.get("/", response_class=HTMLResponse)

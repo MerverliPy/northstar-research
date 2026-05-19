@@ -18,12 +18,17 @@ from northstar_models.models import (
 )
 from northstar_models.schemas import (
     AnalysisCreate,
+    AnalysisUpdate,
     ClaimCreate,
+    ClaimUpdate,
     EntityCreate,
+    EntityUpdate,
     ProjectCreate,
     ProjectUpdate,
     ReportCreate,
+    ReportUpdate,
     SourceCreate,
+    SourceUpdate,
 )
 
 logger = structlog.get_logger(__name__)
@@ -157,6 +162,26 @@ class PostgresRepository:
             )
             return list(result.scalars().all())
 
+    async def update_source(
+        self, source_id: uuid.UUID, data: SourceUpdate
+    ) -> Source | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Source).where(Source.id == source_id)
+            )
+            source = result.scalar_one_or_none()
+            if source is None:
+                return None
+            update_dict = data.model_dump(exclude_unset=True)
+            if "metadata" in update_dict:
+                update_dict["metadata_"] = update_dict.pop("metadata")
+            for field, value in update_dict.items():
+                setattr(source, field, value)
+            source.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            await session.refresh(source)
+            return source
+
     async def delete_source(self, source_id: uuid.UUID) -> bool:
         async with self._session() as session:
             result = await session.execute(
@@ -208,6 +233,26 @@ class PostgresRepository:
             result = await session.execute(query)
             return list(result.scalars().all())
 
+    async def update_entity(
+        self, entity_id: uuid.UUID, data: EntityUpdate
+    ) -> Entity | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Entity).where(Entity.id == entity_id)
+            )
+            entity = result.scalar_one_or_none()
+            if entity is None:
+                return None
+            update_dict = data.model_dump(exclude_unset=True)
+            if "metadata" in update_dict:
+                update_dict["metadata_"] = update_dict.pop("metadata")
+            for field, value in update_dict.items():
+                setattr(entity, field, value)
+            entity.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            await session.refresh(entity)
+            return entity
+
     async def delete_entity(self, entity_id: uuid.UUID) -> bool:
         async with self._session() as session:
             result = await session.execute(
@@ -256,6 +301,26 @@ class PostgresRepository:
             result = await session.execute(query)
             return list(result.scalars().all())
 
+    async def update_claim(
+        self, claim_id: uuid.UUID, data: ClaimUpdate
+    ) -> Claim | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Claim).where(Claim.id == claim_id)
+            )
+            claim = result.scalar_one_or_none()
+            if claim is None:
+                return None
+            update_dict = data.model_dump(exclude_unset=True)
+            if "metadata" in update_dict:
+                update_dict["metadata_"] = update_dict.pop("metadata")
+            for field, value in update_dict.items():
+                setattr(claim, field, value)
+            claim.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            await session.refresh(claim)
+            return claim
+
     async def delete_claim(self, claim_id: uuid.UUID) -> bool:
         async with self._session() as session:
             result = await session.execute(
@@ -298,6 +363,26 @@ class PostgresRepository:
             )
             return list(result.scalars().all())
 
+    async def update_report(
+        self, report_id: uuid.UUID, data: ReportUpdate
+    ) -> Report | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Report).where(Report.id == report_id)
+            )
+            report = result.scalar_one_or_none()
+            if report is None:
+                return None
+            update_dict = data.model_dump(exclude_unset=True)
+            if "metadata" in update_dict:
+                update_dict["metadata_"] = update_dict.pop("metadata")
+            for field, value in update_dict.items():
+                setattr(report, field, value)
+            report.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            await session.refresh(report)
+            return report
+
     async def delete_report(self, report_id: uuid.UUID) -> bool:
         async with self._session() as session:
             result = await session.execute(
@@ -321,6 +406,41 @@ class PostgresRepository:
             await session.commit()
             await session.refresh(analysis)
             return analysis
+
+    async def get_analysis(self, analysis_id: uuid.UUID) -> Analysis | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Analysis).where(Analysis.id == analysis_id)
+            )
+            return result.scalar_one_or_none()
+
+    async def update_analysis(
+        self, analysis_id: uuid.UUID, data: AnalysisUpdate
+    ) -> Analysis | None:
+        async with self._session() as session:
+            result = await session.execute(
+                select(Analysis).where(Analysis.id == analysis_id)
+            )
+            analysis = result.scalar_one_or_none()
+            if analysis is None:
+                return None
+            update_dict = data.model_dump(exclude_unset=True)
+            if "metadata" in update_dict:
+                update_dict["metadata_"] = update_dict.pop("metadata")
+            for field, value in update_dict.items():
+                setattr(analysis, field, value)
+            analysis.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            await session.refresh(analysis)
+            return analysis
+
+    async def delete_analysis(self, analysis_id: uuid.UUID) -> bool:
+        async with self._session() as session:
+            result = await session.execute(
+                delete(Analysis).where(Analysis.id == analysis_id)
+            )
+            await session.commit()
+            return result.rowcount > 0
 
     async def list_analyses(
         self,
@@ -390,6 +510,20 @@ class PostgresRepository:
                 .limit(1)
             )
             return result.scalar_one_or_none()
+
+    async def list_extraction_logs(
+        self,
+        project_id: uuid.UUID | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[ExtractionLog]:
+        async with self._session() as session:
+            query = select(ExtractionLog).order_by(ExtractionLog.created_at.desc())
+            if project_id is not None:
+                query = query.where(ExtractionLog.project_id == project_id)
+            query = query.limit(limit).offset(offset)
+            result = await session.execute(query)
+            return list(result.scalars().all())
 
     async def bulk_create_entities(
         self, entities: list[EntityCreate]

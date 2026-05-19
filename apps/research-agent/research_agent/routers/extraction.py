@@ -28,7 +28,7 @@ async def trigger_extraction(
     if not req.force and not settings.force_graph_extraction:
         raise HTTPException(
             status_code=403,
-            detail="Extraction not allowed without force flag. Set force=true or ENABLE_FORCE_GRAPH_EXTRACTION=true",
+            detail="Extraction not allowed without force flag. Set force=true or FORCE_GRAPH_EXTRACTION=true",
         )
 
     source = await db.get_source(req.source_id)
@@ -81,4 +81,4 @@ async def list_pending_extractions(
             .order_by(ExtractionLog.created_at.desc())
         )
         logs = result.scalars().all()
-    return [ExtractionLogRead.model_validate(l) for l in logs]
+    return [ExtractionLogRead.model_validate(log) for log in logs]

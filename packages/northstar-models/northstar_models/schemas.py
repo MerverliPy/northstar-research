@@ -91,6 +91,16 @@ class EntityCreate(BaseModel):
     confidence: Optional[float] = None
 
 
+class EntityUpdate(BaseModel):
+    source_id: Optional[uuid.UUID] = None
+    name: Optional[str] = None
+    entity_type: Optional[EntityType] = None
+    aliases: Optional[dict[str, Any]] = None
+    description: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
+    confidence: Optional[float] = None
+
+
 class EntityRead(BaseModel):
     id: uuid.UUID
     source_id: Optional[uuid.UUID] = None
@@ -101,6 +111,7 @@ class EntityRead(BaseModel):
     metadata: Optional[dict[str, Any]] = None
     confidence: Optional[float] = None
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -109,6 +120,16 @@ class ClaimCreate(BaseModel):
     source_id: Optional[uuid.UUID] = None
     entity_id: Optional[uuid.UUID] = None
     claim_text: str
+    claim_type: Optional[str] = None
+    confidence: Optional[float] = None
+    context: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
+
+
+class ClaimUpdate(BaseModel):
+    source_id: Optional[uuid.UUID] = None
+    entity_id: Optional[uuid.UUID] = None
+    claim_text: Optional[str] = None
     claim_type: Optional[str] = None
     confidence: Optional[float] = None
     context: Optional[str] = None
@@ -125,6 +146,7 @@ class ClaimRead(BaseModel):
     context: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -132,6 +154,13 @@ class ClaimRead(BaseModel):
 class ReportCreate(BaseModel):
     project_id: uuid.UUID
     title: str
+    summary: Optional[str] = None
+    report_data: Optional[dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
+
+
+class ReportUpdate(BaseModel):
+    title: Optional[str] = None
     summary: Optional[str] = None
     report_data: Optional[dict[str, Any]] = None
     metadata: Optional[dict[str, Any]] = None
@@ -160,6 +189,16 @@ class AnalysisCreate(BaseModel):
     metadata: Optional[dict[str, Any]] = None
 
 
+class AnalysisUpdate(BaseModel):
+    source_id: Optional[uuid.UUID] = None
+    project_id: Optional[uuid.UUID] = None
+    analysis_type: Optional[str] = None
+    content: Optional[dict[str, Any]] = None
+    model_used: Optional[str] = None
+    quality_score: Optional[float] = None
+    metadata: Optional[dict[str, Any]] = None
+
+
 class AnalysisRead(BaseModel):
     id: uuid.UUID
     source_id: Optional[uuid.UUID] = None
@@ -170,6 +209,7 @@ class AnalysisRead(BaseModel):
     quality_score: Optional[float] = None
     metadata: Optional[dict[str, Any]] = None
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 

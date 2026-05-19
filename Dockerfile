@@ -17,14 +17,14 @@ RUN pip install -e /app/packages/northstar-models \
     && pip install -e /app/packages/northstar-vector \
     && pip install -e /app/packages/northstar-db \
     && pip install -e /app/apps/research-agent
-CMD ["uvicorn", "research_agent.app.main:app", "--host", "0.0.0.0", "--port", "8099"]
+CMD ["uvicorn", "research_agent.main:app", "--host", "0.0.0.0", "--port", "8099"]
 
 FROM base AS bridge
 COPY packages/northstar-models /app/packages/northstar-models
 COPY apps/chat-import-bridge /app/apps/chat-import-bridge
 RUN pip install -e /app/packages/northstar-models \
     && pip install -e /app/apps/chat-import-bridge
-CMD ["uvicorn", "chat_import_bridge.app.main:app", "--host", "0.0.0.0", "--port", "3022"]
+CMD ["uvicorn", "chat_import_bridge.main:app", "--host", "0.0.0.0", "--port", "3022"]
 
 FROM base AS portal
 COPY packages/northstar-models /app/packages/northstar-models
@@ -33,4 +33,4 @@ COPY apps/research-portal /app/apps/research-portal
 RUN pip install -e /app/packages/northstar-models \
     && pip install -e /app/packages/northstar-db \
     && pip install -e /app/apps/research-portal
-CMD ["uvicorn", "research_portal.app.main:app", "--host", "0.0.0.0", "--port", "3010"]
+CMD ["uvicorn", "research_portal.main:app", "--host", "0.0.0.0", "--port", "3010"]

@@ -7,7 +7,8 @@ import pytest
 from northstar_vector import VectorStore, VectorStoreError
 from northstar_vector.schemas import CollectionInfo, DocumentChunk, SearchResult
 
-pytestmark = pytest.mark.asyncio
+# Module-level mark removed to avoid warnings on sync-only classes.
+# Each async class has its own pytestmark.
 
 
 class TestDocumentChunk:
@@ -56,6 +57,8 @@ class TestCollectionInfo:
 
 
 class TestVectorStoreInit:
+    pytestmark = pytest.mark.asyncio
+
     async def test_not_initialized_raises(self):
         store = VectorStore(chroma_persist_dir="/tmp/nonexistent")
         with pytest.raises(VectorStoreError, match="not initialized"):
@@ -76,6 +79,8 @@ class TestVectorStoreInit:
 
 
 class TestVectorStoreOperations:
+    pytestmark = pytest.mark.asyncio
+
     async def test_add_documents_needs_embedding(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             store = VectorStore(chroma_persist_dir=tmpdir)

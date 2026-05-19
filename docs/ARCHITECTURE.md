@@ -23,7 +23,7 @@ User topic or approved chat transcript
 | Research Agent | Research workflow, APIs, health checks, graph extraction, quality scoring, cleanup reports. |
 | PostgreSQL | Source of truth for projects, sources, reports, metadata, and durable records. |
 | Neo4j | Visual relationship layer for graph views and graph quality checks. |
-| Native WSL Portal | Operator UI, usually on local port `3010`. |
+| Native WSL Portal | Operator UI (PWA) on local port `3010`. Offline shell, installable, SW update prompt via toast. |
 | Tailscale Serve | Optional HTTPS exposure to trusted tailnet clients. |
 | Watcher | Read-only reporter for completed projects without graphs. |
 | Controlled Gate | Safe extraction gate that skips existing graphs, caps work, and checks quality. |

@@ -8,6 +8,12 @@ from northstar_models.models import Claim, Entity
 
 logger = structlog.get_logger(__name__)
 
+# Allowlist of valid Cypher relationship types to prevent injection
+VALID_RELATIONSHIP_TYPES: frozenset[str] = frozenset({
+    "MENTIONS", "RELATES_TO", "MAKES_CLAIM", "CITES", "REFERENCES",
+    "SUPPORTS", "CONTRADICTS", "ASSOCIATED_WITH", "PART_OF", "LEADS_TO",
+})
+
 
 class GraphError(Exception):
     pass
@@ -104,13 +110,15 @@ class Neo4jRepository:
         entity_id: uuid.UUID,
         relationship_type: str = "MENTIONS",
     ) -> None:
+        if relationship_type not in VALID_RELATIONSHIP_TYPES:
+            raise GraphError(f"Invalid relationship type: {relationship_type}")
         async with self._session() as session:
             await session.run(
-                """
-                MATCH (s:Source {id: $source_id})
-                MATCH (e:Entity {id: $entity_id})
-                MERGE (s)-[r:%s]->(e)
-                """ % relationship_type,
+                f"""
+                MATCH (s:Source {{id: $source_id}})
+                MATCH (e:Entity {{id: $entity_id}})
+                MERGE (s)-[r:{relationship_type}]->(e)
+                """,
                 source_id=str(source_id),
                 entity_id=str(entity_id),
             )
@@ -122,6 +130,8 @@ class Neo4jRepository:
         relationship_type: str,
         properties: dict | None = None,
     ) -> None:
+        if relationship_type not in VALID_RELATIONSHIP_TYPES:
+            raise GraphError(f"Invalid relationship type: {relationship_type}")
         async with self._session() as session:
             params = {
                 "id1": str(entity_id_1),
@@ -130,21 +140,21 @@ class Neo4jRepository:
             if properties:
                 params["props"] = properties
                 await session.run(
-                    """
-                    MATCH (a:Entity {id: $id1})
-                    MATCH (b:Entity {id: $id2})
-                    MERGE (a)-[r:%s]->(b)
+                    f"""
+                    MATCH (a:Entity {{id: $id1}})
+                    MATCH (b:Entity {{id: $id2}})
+                    MERGE (a)-[r:{relationship_type}]->(b)
                     SET r += $props
-                    """ % relationship_type,
+                    """,
                     **params,
                 )
             else:
                 await session.run(
-                    """
-                    MATCH (a:Entity {id: $id1})
-                    MATCH (b:Entity {id: $id2})
-                    MERGE (a)-[r:%s]->(b)
-                    """ % relationship_type,
+                    f"""
+                    MATCH (a:Entity {{id: $id1}})
+                    MATCH (b:Entity {{id: $id2}})
+                    MERGE (a)-[r:{relationship_type}]->(b)
+                    """,
                     **params,
                 )
 

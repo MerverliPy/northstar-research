@@ -280,6 +280,8 @@ Active route highlighted with `bg-[#e94560]/10 text-[#e94560] border-r-2 border-
 | `Badge` | `variant` (green/yellow/red/blue/gray) | Status pills (scores, states, types) |
 | `Table` | `columns[]`, `data[]`, `keyField`, `onRowClick?` | Generic data table with typed column rendering |
 | `Modal` | `open`, `onClose`, `title`, `children` | Overlay dialog with Escape-to-close |
+| `OfflineBanner` | none | Fixed top alert bar when `window.navigator.onLine === false` |
+| `ToastContainer` | none | Fixed bottom-right stack of auto-dismiss notifications, rendered from `toastStore` |
 
 ---
 
@@ -292,6 +294,7 @@ Active route highlighted with `bg-[#e94560]/10 text-[#e94560] border-r-2 border-
 | `chatStore` | `messages[]`, `isStreaming`, `thinkingText`, `currentActions[]` | SSE streaming chat state |
 | `projectStore` | `projects[]`, `sources[]`, `entities[]`, `claims[]`, `reports[]`, `stats` | CRUD entity cache + API calls |
 | `settingsStore` | `settings`, `loading` | Safety gate status from `/api/settings` |
+| `toastStore` | `toasts[]`, `addToast(msg, variant, action?)`, `dismissToast(id)` | Global auto-dismiss toast notifications (success/error/info) |
 
 ---
 
@@ -325,8 +328,10 @@ Manual CRUD:
 | **Installable** | `manifest.webmanifest` with name "Northstar Research Console", theme `#1a1a2e`, accent `#e94560` |
 | **Offline shell** | Service worker precaches HTML/CSS/JS via workbox |
 | **API caching** | Runtime `NetworkFirst` strategy for `/api/*` (100 entries, 5-min TTL) |
-| **Icons** | 192×192 and 512×512 PNG |
-| **Auto-update** | `registerType: 'autoUpdate'` — new SW activates on reload |
+| **Icons** | 192×192, 512×512, 192×192 maskable, 152×152 (iOS), 180×180 (iOS) PNG |
+| **SW update** | `registerType: 'prompt'` — `usePWA` hook listens for `waiting` event, shows "Reload" toast via `toastStore` |
+| **iOS PWA** | `apple-mobile-web-app-capable`, `status-bar-style=black-translucent`, apple-touch-icon for 152/180/192 |
+| **Offline detection** | `OfflineBanner` component listens for `window.offline`/`online` events, shows yellow alert bar when offline |
 | **Secure context** | Required for full PWA features (crypto, SW registration); falls back gracefully |
 
 ---

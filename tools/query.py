@@ -12,7 +12,6 @@ Commands:
 """
 
 import argparse
-import json
 import sys
 import uuid
 

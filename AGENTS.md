@@ -48,7 +48,7 @@ Editable install order (enforced by `make install-all`): models → llm → vect
 - **Async everything** — all services, repos, routers use `async def`
 - **4-space indent** for Python, **2-space** for everything else, **tabs** for Makefile
 - **LF line endings**, trailing newline required (`.editorconfig`)
-- **Ruff linting** — `ruff check packages/ apps/ scripts/` (no config file, uses defaults)
+- **Ruff linting** — `ruff check packages/ apps/ scripts/ tools/` (no config file, uses defaults)
 - **Module naming** — directories use hyphens (`northstar-models/`), Python packages use underscores (`northstar_models/`)
 - **Type hints** required in all public function signatures
 
@@ -115,6 +115,6 @@ Do not create new top-level directories without updating `ROOT_STRUCTURE.md`. Ne
 
 When referencing architecture details, read:
 - `docs/ARCHITECTURE.md` for system design
-- `docs/API.md` for endpoint documentation
+- `docs/API_ENDPOINTS.md` for endpoint documentation
 - `ROOT_STRUCTURE.md` for directory layout rules
 - `.opencode/contracts/BUILD_CONTRACT.md` for current build status

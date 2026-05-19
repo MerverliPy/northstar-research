@@ -1,5 +1,8 @@
 SHELL := /usr/bin/env bash
 
+# Detect venv, fall back to PATH
+VENV := $(shell which python3 2>/dev/null | xargs dirname 2>/dev/null || echo "/usr/local/bin")
+
 .PHONY: doctor health check-secrets lint tree install install-all test portal-dev portal-build
 
 doctor:
@@ -12,7 +15,7 @@ check-secrets:
 	@scripts/verify-no-secrets.sh
 
 lint:
-	@ruff check packages/ apps/ scripts/
+	@$(VENV)/ruff check packages/ apps/ scripts/ tools/
 
 tree:
 	@find . -type f \( -name '*.py' -o -name '*.toml' -o -name '*.yml' -o -name '*.yaml' -o -name '*.ini' -o -name '*.sh' -o -name '*.md' -o -name '*.env*' \) \
@@ -31,7 +34,7 @@ install-all: install
 	@pip install -e apps/research-portal
 
 test:
-	@pytest tests/ -v
+	@$(VENV)/pytest tests/ -v
 
 portal-dev:
 	@cd apps/research-portal/research_portal/spa && npm run dev

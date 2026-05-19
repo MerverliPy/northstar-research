@@ -8,3 +8,7 @@ northstar-models
 northstar-llm
 northstar-vector
 northstar-db
+
+[scraper]
+playwright>=1.40
+cloakbrowser>=0.3.14

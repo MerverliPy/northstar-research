@@ -142,6 +142,7 @@ python tools/export.py <source-id> --format markdown --output article.md
 | GET | `/api/v1/cleanup/report` | Dry-run cleanup report |
 | POST | `/api/v1/cleanup/execute` | Execute cleanup (403 unless flag) |
 | POST | `/api/v1/search` | Vector search |
+| POST | `/api/v1/scraping/scrape` | Scrape URL + optional extraction |
 
 ### Chat Import Bridge (:3022)
 
@@ -160,12 +161,13 @@ python tools/export.py <source-id> --format markdown --output article.md
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Dashboard |
-| GET | `/quality` | Quality scoring page |
-| GET/POST | `/cleanup` | Cleanup report/execute |
-| GET/POST | `/extraction` | Extraction gate |
-| GET | `/graph` | Graph viewer |
+| GET | `/dashboard/` | Dashboard |
+| GET/POST | `/quality/` | Quality scoring page |
+| GET/POST | `/cleanup/` | Cleanup report/execute |
+| GET/POST | `/extraction/` | Extraction gate |
+| GET | `/visual/` | Graph viewer (vis.js) |
 | GET | `/graph/data/{project_id}` | Graph JSON (vis.js) |
+| POST | `/api/chat` | AI chat orchestrator |
 
 ## Safety doctrine
 
@@ -199,7 +201,7 @@ ollama pull qwen3:14b && ollama pull llama3.1:8b && ollama pull nomic-embed-text
 make doctor        # Preflight dependency check
 make health        # Ping all 3 service health endpoints
 make lint          # ruff check
-make test          # Run test suite (229 tests)
+make test          # Run test suite (268 tests)
 make install       # Install shared packages
 make install-all   # Install everything (packages + apps)
 make tree          # Show source file tree

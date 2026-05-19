@@ -13,6 +13,7 @@ secrets/
 private/
 
 # --- Python ---
+*.egg-info/
 __pycache__/
 *.py[cod]
 *.pyo

@@ -1,7 +1,7 @@
 Metadata-Version: 2.4
 Name: research-portal
-Version: 0.1.0
-Summary: Northstar Research Portal — Jinja2+HTMX dashboards, graph viewer
+Version: 0.2.0
+Summary: Northstar Research Console — React PWA with AI chat orchestrator, dashboards, graph viewer
 Requires-Python: >=3.11
 Requires-Dist: fastapi>=0.114
 Requires-Dist: uvicorn>=0.30

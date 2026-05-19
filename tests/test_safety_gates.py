@@ -89,10 +89,15 @@ class TestBridgeSafety:
             assert not hasattr(mock_add.call_args[0][0], "create_project")
 
     async def test_bridge_never_touches_neo4j(self, bridge_client):
-        from northstar_db import Neo4jRepository
-        for mod_name in ["northstar_db.pg_repo", "northstar_db.neo4j_repo"]:
-            pass
-        assert True
+        # Bridge should not import or depend on Neo4jRepository.
+        # Verify by checking bridge's pyproject.toml doesn't declare northstar-db.
+        import tomllib
+        from pathlib import Path
+        bridge_pyproject = Path(__file__).resolve().parent.parent / "apps" / "chat-import-bridge" / "pyproject.toml"
+        with open(bridge_pyproject, "rb") as f:
+            data = tomllib.load(f)
+        deps = data.get("project", {}).get("dependencies", [])
+        assert all("northstar-db" not in d for d in deps), "Bridge should not depend on northstar-db"
 
 
 class TestSafetyGateDefaults:

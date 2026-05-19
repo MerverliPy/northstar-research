@@ -263,6 +263,7 @@ class TestPydanticSchemas:
             name="Entity",
             entity_type=EntityType.PERSON,
             created_at=now,
+            updated_at=now,
         )
         assert data.name == "Entity"
 
@@ -272,6 +273,7 @@ class TestPydanticSchemas:
             id=uuid.uuid4(),
             claim_text="Claim",
             created_at=now,
+            updated_at=now,
         )
         assert data.claim_text == "Claim"
 
@@ -293,6 +295,7 @@ class TestPydanticSchemas:
             analysis_type="quality",
             content={"score": 0.8},
             created_at=now,
+            updated_at=now,
         )
         assert data.analysis_type == "quality"
 

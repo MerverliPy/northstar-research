@@ -40,7 +40,7 @@ Return score (0.0-1.0) and reasoning."""
         response_model=LLMQualityResult,
     )
 
-    analysis = await db.create_analysis(
+    await db.create_analysis(
         AnalysisCreate(
             source_id=source_id,
             analysis_type="quality_score",

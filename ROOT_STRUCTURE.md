@@ -22,6 +22,7 @@ This root scaffold is designed for a local AI research system with PostgreSQL as
 | Directory | Purpose |
 |---|---|
 | `apps/` | Service-specific source trees. |
+| `packages/` | Shared Python packages (models, llm, vector, db). |
 | `config/` | Example-only configuration. Never commit real `.env` files. |
 | `docker/` | Docker Compose examples and runtime notes. |
 | `docs/` | Operator manual, runbooks, decisions, and API references. |

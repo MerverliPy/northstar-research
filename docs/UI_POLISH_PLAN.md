@@ -3,7 +3,7 @@
 **Stack:** React 19 + TypeScript + Vite + Tailwind CSS v4 + PWA  
 **Theme:** Dark (`#1a1a2e` bg, `#e94560` accent)  
 **State:** Zustand stores  
-**PWA:** vite-plugin-pwa, auto-update SW, NetworkFirst API cache  
+**PWA:** vite-plugin-pwa, prompt-based SW update (usePWA hook), NetworkFirst API cache  
 
 **Last updated:** All Batches Completed
 
@@ -25,7 +25,7 @@
 | **Message bubbles** | Low | MessageBubble.tsx (no timestamps, no copy action) |
 | **Dashboard stat cards** | Low | DashboardView.tsx (no colored accent bars, no icons) |
 | **Result card header** | Low | ResultCard.tsx (minimal header, no icon per tool type) |
-| **PWA polish** | Low | index.html (no splash meta tags), no install prompt UI |
+| **PWA polish** | Low | index.html (no splash meta tags), install prompt (beforeinstallprompt) not captured |
 | **Safe-area spacing** | Low | index.css (no `env(safe-area-inset-*)` for mobile) |
 | **Focus-visible rings** | Medium | Global (no custom focus-visible, Tailwind default only) |
 
@@ -91,14 +91,26 @@
 
 ---
 
-### Files NOT Changed
+### Files Changed After Batch 5
+
+Subsequent PWA fixes (commit `fix(portal): fix PWA installability`) modified these files:
+- `vite.config.ts` — switched `registerType` from `'autoUpdate'` to `'prompt'`, added `injectRegister: false`, added maskable icon to manifest
+- `src/hooks/usePWA.ts` — new hook using `workbox-window`, listens for SW `waiting`/`activated` events, shows update toast
+- `src/components/shared/OfflineBanner.tsx` — new component, detects offline/online, shows fixed alert bar
+- `src/components/shared/Toast.tsx` — updated with action button support (used by usePWA update prompt)
+- `src/stores/toastStore.ts` — updated with `action?` field on `Toast`, 8s timeout for actionable toasts
+- `src/App.tsx` — added `<OfflineBanner />`, `<ToastContainer />`, `usePWA()`
+- `index.html` — added iOS PWA meta tags, apple-touch-icons, light-theme theme-color
+- `research_portal/main.py` — added `/icons` static mount, `favicon.svg` static mount
+- Public icons — added `icon-152.png`, `icon-180.png`, `icon-192-maskable.png`
+- Static build artifacts — rebuilt `manifest.webmanifest`, `sw.js`, `index.html`, assets
+
+### Files NOT Changed (during polish batches)
 
 - Stores: `chatStore.ts`, `projectStore.ts`, `settingsStore.ts`
 - Hooks: `useSSE.ts`, `useAPI.ts`
 - Types: `index.ts`
 - Router: `router.tsx`
-- PWA core: `vite.config.ts` (manifest, SW, caching strategy)
-- Backend: any Python files
 
 ### Checks
 

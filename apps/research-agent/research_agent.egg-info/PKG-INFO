@@ -13,3 +13,6 @@ Requires-Dist: northstar-models
 Requires-Dist: northstar-llm
 Requires-Dist: northstar-vector
 Requires-Dist: northstar-db
+Provides-Extra: scraper
+Requires-Dist: playwright>=1.40; extra == "scraper"
+Requires-Dist: cloakbrowser>=0.3.14; extra == "scraper"

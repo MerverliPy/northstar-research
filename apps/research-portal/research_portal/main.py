@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from research_portal.config import settings
 from research_portal.dependencies import close_services, get_db, get_neo4j, init_services
-from research_portal.routers import chat
+from research_portal.routers import chat, dashboard, extraction, quality, cleanup, visual
 from research_portal.services.orchestrator import Orchestrator
 from research_portal.services.conversation import ConversationStore
 
@@ -92,7 +92,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3010", "http://127.0.0.1:3010", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -108,6 +108,11 @@ if (STATIC_DIR / "favicon.svg").exists():
     app.mount("/favicon.svg", StaticFiles(directory=str(STATIC_DIR)), name="spa_favicon")
 
 app.include_router(chat.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/dashboard")
+app.include_router(extraction.router, prefix="/extraction")
+app.include_router(quality.router, prefix="/quality")
+app.include_router(cleanup.router, prefix="/cleanup")
+app.include_router(visual.router, prefix="/visual")
 
 
 @app.get("/api/settings")

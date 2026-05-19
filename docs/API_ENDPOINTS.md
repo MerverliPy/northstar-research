@@ -1,37 +1,103 @@
 # API Endpoint Reference
 
-## Research Agent
+## Research Agent (port 8099)
 
-```text
-GET /health
-GET /knowledge/quality/report
-GET /knowledge/quality/project/{project_id}/report
-GET /knowledge/cleanup/report
-GET /knowledge/cleanup/project/{project_id}/report
-```
+All routes prefixed with `/api/v1` unless otherwise noted.
 
-## Research Portal
+### Projects
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/v1/projects/` | List projects |
+| POST | `/api/v1/projects/` | Create project |
+| GET | `/api/v1/projects/{id}` | Get project by ID |
+| PUT | `/api/v1/projects/{id}` | Update project |
+| DELETE | `/api/v1/projects/{id}` | Delete project |
 
-```text
-GET /knowledge/dashboard
-GET /knowledge/quality
-GET /knowledge/cleanup
-GET /knowledge/auto-extract
-GET /knowledge/auto-extract/watcher
-GET /knowledge/visual2/project/{project_id}
-GET /api/knowledge/status
-```
+### Sources
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/sources/` | List sources |
+| POST | `/api/v1/sources/` | Create source |
+| GET | `/api/v1/sources/{id}` | Get source by ID |
+| DELETE | `/api/v1/sources/{id}` | Delete source |
 
-## Chat Import Bridge
+### Entities
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/entities/` | List entities |
+| POST | `/api/v1/entities/` | Create entity |
+| GET | `/api/v1/entities/{id}` | Get entity by ID |
+| DELETE | `/api/v1/entities/{id}` | Delete entity |
 
-```text
-GET  /health
-GET  /chat-import
-POST /api/chat-imports
-GET  /api/chat-imports
-GET  /api/chat-imports/{id}
-GET  /api/chat-imports/{id}/export
-POST /api/chat-imports/{id}/status
-```
+### Claims
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/claims/` | List claims |
+| POST | `/api/v1/claims/` | Create claim |
+| GET | `/api/v1/claims/{id}` | Get claim by ID |
+| DELETE | `/api/v1/claims/{id}` | Delete claim |
+
+### Reports
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/reports/` | List reports |
+| POST | `/api/v1/reports/` | Create report |
+| DELETE | `/api/v1/reports/{id}` | Delete report |
+
+### Extraction
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/extraction/extract` | Trigger extraction (403 unless FORCE_GRAPH_EXTRACTION=true) |
+| GET | `/api/v1/extraction/status/{id}` | Extraction status |
+
+### Quality
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/quality/score` | Score source quality |
+
+### Cleanup
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/cleanup/report` | Dry-run cleanup report |
+| POST | `/api/v1/cleanup/execute` | Execute cleanup (403 unless ENABLE_DESTRUCTIVE_CLEANUP=true) |
+
+### Search
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/search` | Vector search |
+
+### Scraping
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/scraping/scrape` | Scrape URL + optional extraction |
+
+## Chat Import Bridge (port 3022)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check |
+| POST | `/api/v1/imports/paste` | Import content via paste |
+| GET | `/api/v1/imports` | List staged imports |
+| GET | `/api/v1/imports/{id}` | Get staged import |
+| DELETE | `/api/v1/imports/{id}` | Delete staged import |
+| GET | `/api/v1/export/{id}/markdown` | Export as Markdown |
+| POST | `/api/v1/promotion/{id}` | Promote import to Agent |
+| POST | `/api/v1/promotion/batch` | Promote all pending |
+
+## Research Portal (port 3010)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check |
+| GET | `/dashboard/` | Dashboard (HTML) |
+| GET | `/quality/` | Quality scoring page (HTML) |
+| GET/POST | `/cleanup/` | Cleanup report/execute (HTML) |
+| GET/POST | `/extraction/` | Extraction gate (HTML) |
+| GET | `/visual/` | Graph viewer (vis.js HTML) |
+| GET | `/graph/data/{project_id}` | Graph JSON data |
+| GET | `/api/settings` | Current safety gate settings |
+| POST | `/api/chat` | AI chat orchestrator |
+| ALL | `/api/v1/{path}` | API proxy to research-agent |
 
 Treat this file as an operator reference. Confirm actual routes against the running app before relying on them in automation.

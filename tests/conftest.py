@@ -100,6 +100,7 @@ def mock_db():
         description = "A test entity"
         confidence = 0.95
         created_at = _now
+        updated_at = _now
 
     class FakeClaim:
         id = test_claim_id
@@ -110,6 +111,7 @@ def mock_db():
         confidence = 0.9
         context = None
         created_at = _now
+        updated_at = _now
 
     class FakeReport:
         id = test_report_id
@@ -128,6 +130,7 @@ def mock_db():
         quality_score = 0.85
         model_used = "qwen3:14b"
         created_at = _now
+        updated_at = _now
 
     class FakeExtractionLog:
         id = uuid.uuid4()
