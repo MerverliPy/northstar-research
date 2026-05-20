@@ -19,20 +19,28 @@ async def extraction_gate(
     db: PostgresRepository = Depends(get_db),
 ):
     projects = await db.list_projects(limit=50)
-    pending_sources = []
-
+    all_source_ids = []
+    source_map: dict = {}
     for p in projects:
         sources = await db.list_sources(p.id, limit=50)
         for s in sources:
-            extraction_log = await db.get_extraction_log(s.id)
-            status = extraction_log.status.value if extraction_log else "pending"
-            pending_sources.append({
-                "id": str(s.id),
-                "title": s.title,
-                "project_name": p.name,
-                "project_id": str(p.id),
-                "status": status,
-            })
+            all_source_ids.append(s.id)
+            source_map[s.id] = {"source": s, "project_name": p.name, "project_id": str(p.id)}
+
+    extraction_logs_map = await db.latest_extraction_logs_by_source_ids(all_source_ids)
+    pending_sources = []
+
+    for source_id, info in source_map.items():
+        s = info["source"]
+        extraction_log = extraction_logs_map.get(source_id)
+        status = extraction_log.status.value if extraction_log else "pending"
+        pending_sources.append({
+            "id": str(s.id),
+            "title": s.title,
+            "project_name": info["project_name"],
+            "project_id": info["project_id"],
+            "status": status,
+        })
 
     template = env.get_template("extraction.html")
     content = template.render(

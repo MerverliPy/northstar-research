@@ -38,6 +38,19 @@ class Neo4jRepository:
         )
         async with self._driver.session() as session:
             await session.run("RETURN 1")
+            try:
+                await session.run("CALL apoc.help('help')")
+            except Exception:
+                raise GraphError(
+                    "APOC library is not installed in Neo4j. Install it to enable graph operations: "
+                    "https://neo4j.com/labs/apoc/"
+                )
+            await session.run("CREATE INDEX entity_id_index IF NOT EXISTS FOR (e:Entity) ON (e.id)")
+            await session.run("CREATE INDEX entity_type_index IF NOT EXISTS FOR (e:Entity) ON (e.entity_type)")
+            await session.run("CREATE INDEX source_id_index IF NOT EXISTS FOR (s:Source) ON (s.id)")
+            await session.run("CREATE INDEX source_project_index IF NOT EXISTS FOR (s:Source) ON (s.project_id)")
+            await session.run("CREATE CONSTRAINT entity_id_unique IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE")
+            await session.run("CREATE CONSTRAINT source_id_unique IF NOT EXISTS FOR (s:Source) REQUIRE s.id IS UNIQUE")
         logger.info("neo4j_initialized")
 
     async def close(self) -> None:
@@ -213,6 +226,8 @@ class Neo4jRepository:
                 MATCH (s:Source)
                 WHERE s.project_id = $project_id
                 OPTIONAL MATCH (s)-[r]-(e:Entity)
+                WITH s, r, e
+                LIMIT 2000
                 WITH collect(DISTINCT s) AS source_nodes,
                      collect(DISTINCT e) AS entity_nodes,
                      collect(DISTINCT r) AS rels

@@ -20,7 +20,7 @@ async def cleanup_dashboard(
     projects = await db.list_projects(limit=50)
     total_sources = 0
     for p in projects:
-        sources = await db.list_sources(p.id, limit=9999)
+        sources = await db.list_sources(p.id, limit=1000)
         total_sources += len(sources)
 
     entity_count = await neo4j.get_entity_count()

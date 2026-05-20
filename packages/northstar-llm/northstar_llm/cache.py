@@ -12,7 +12,7 @@ class LLMResponseCache:
     def __init__(self, cache_dir: str = "~/.cache/northstar/llm", ttl: int = 86400):
         resolved = os.path.expanduser(cache_dir)
         Path(resolved).mkdir(parents=True, exist_ok=True)
-        self._cache = Cache(resolved)
+        self._cache = Cache(resolved, size_limit=1_000_000_000)
         self._ttl = ttl
 
     def _key(

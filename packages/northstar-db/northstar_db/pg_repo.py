@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 import structlog
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from northstar_models.base import CommonModel
@@ -40,7 +40,14 @@ class PostgresRepository:
         database_url: str = "postgresql+asyncpg://localhost:5432/northstar",
         echo: bool = False,
     ):
-        self._engine = create_async_engine(database_url, echo=echo)
+        self._engine = create_async_engine(
+            database_url,
+            echo=echo,
+            pool_size=20,
+            max_overflow=10,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
         self._session_factory = async_sessionmaker(
             self._engine,
             class_=AsyncSession,
@@ -125,6 +132,22 @@ class PostgresRepository:
             )
             await session.commit()
             return result.rowcount > 0
+
+    async def count_sources(self, project_id: uuid.UUID) -> int:
+        async with self._session() as session:
+            result = await session.execute(
+                select(func.count(Source.id)).where(Source.project_id == project_id)
+            )
+            return result.scalar() or 0
+
+    async def count_claims_by_project(self, project_id: uuid.UUID) -> int:
+        async with self._session() as session:
+            result = await session.execute(
+                select(func.count(Claim.id))
+                .join(Source, Claim.source_id == Source.id)
+                .where(Source.project_id == project_id)
+            )
+            return result.scalar() or 0
 
     async def create_source(self, data: SourceCreate) -> Source:
         async with self._session() as session:
@@ -459,6 +482,30 @@ class PostgresRepository:
             result = await session.execute(query)
             return list(result.scalars().all())
 
+    async def latest_analyses_by_source_ids(
+        self, source_ids: list[uuid.UUID]
+    ) -> dict[uuid.UUID, Analysis | None]:
+        if not source_ids:
+            return {}
+        async with self._session() as session:
+            subq = (
+                select(
+                    Analysis.source_id,
+                    func.max(Analysis.created_at).label("max_created"),
+                )
+                .where(Analysis.source_id.in_(source_ids))
+                .group_by(Analysis.source_id)
+                .subquery()
+            )
+            result = await session.execute(
+                select(Analysis)
+                .join(subq, and_(
+                    Analysis.source_id == subq.c.source_id,
+                    Analysis.created_at == subq.c.max_created,
+                ))
+            )
+            return {a.source_id: a for a in result.scalars().all()}
+
     async def create_extraction_log(
         self, source_id: uuid.UUID, project_id: uuid.UUID
     ) -> ExtractionLog:
@@ -511,6 +558,30 @@ class PostgresRepository:
                 .limit(1)
             )
             return result.scalar_one_or_none()
+
+    async def latest_extraction_logs_by_source_ids(
+        self, source_ids: list[uuid.UUID]
+    ) -> dict[uuid.UUID, ExtractionLog | None]:
+        if not source_ids:
+            return {}
+        async with self._session() as session:
+            subq = (
+                select(
+                    ExtractionLog.source_id,
+                    func.max(ExtractionLog.created_at).label("max_created"),
+                )
+                .where(ExtractionLog.source_id.in_(source_ids))
+                .group_by(ExtractionLog.source_id)
+                .subquery()
+            )
+            result = await session.execute(
+                select(ExtractionLog)
+                .join(subq, and_(
+                    ExtractionLog.source_id == subq.c.source_id,
+                    ExtractionLog.created_at == subq.c.max_created,
+                ))
+            )
+            return {e.source_id: e for e in result.scalars().all()}
 
     async def list_extraction_logs(
         self,

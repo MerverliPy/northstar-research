@@ -18,16 +18,15 @@ async def dashboard(
     projects = await db.list_projects(limit=10)
     project_count = len(projects)
 
-    source_count = sum(len(await db.list_sources(p.id, limit=9999)) for p in projects)
+    source_count = 0
+    for p in projects:
+        source_count += await db.count_sources(p.id)
 
     entity_count = await neo4j.get_entity_count()
 
     claim_count = 0
     for p in projects:
-        sources = await db.list_sources(p.id, limit=9999)
-        for s in sources:
-            claims = await db.list_claims(source_id=s.id, limit=9999)
-            claim_count += len(claims)
+        claim_count += await db.count_claims_by_project(p.id)
 
     recent_projects = [
         {

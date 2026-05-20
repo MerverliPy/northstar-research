@@ -74,6 +74,13 @@ async def _agent_get(client: httpx.AsyncClient, url: str, params: dict | None = 
     return []
 
 
+def _agent_params(params: dict[str, str], limit: int, offset: int) -> dict[str, str]:
+    agent_params = dict(params)
+    agent_params["limit"] = str(limit)
+    agent_params["offset"] = str(offset)
+    return agent_params
+
+
 @router.api_route("/{path:path}", methods=[GET, POST, PUT, DELETE])
 async def api_v1_handler(request: Request, path: str):
     client: httpx.AsyncClient = request.app.state.http_client
@@ -85,11 +92,10 @@ async def api_v1_handler(request: Request, path: str):
 
     if path.rstrip("/") == "projects":
         if method == GET:
-            items_raw = await _agent_get(client, f"{agent_base}/projects")
+            items_raw = await _agent_get(client, f"{agent_base}/projects", _agent_params(params, limit, offset))
             items = [transform_project(p) for p in items_raw]
             total = len(items)
-            paged = items[offset:offset + limit]
-            return paginated_response(paged, total, limit, offset)
+            return paginated_response(items, total, limit, offset)
 
         if method == POST:
             body = await request.json()
@@ -113,32 +119,22 @@ async def api_v1_handler(request: Request, path: str):
     if path.rstrip("/") == "reports":
         if method == GET:
             project_id = params.get("project_id")
-            reports: list[dict] = []
+            agent_params = _agent_params(params, limit, offset)
             if project_id and project_id != "all":
-                try:
-                    resp = await client.get(f"{agent_base}/reports")
-                    if resp.status_code == 200:
-                        all_reports = resp.json()
-                        if isinstance(all_reports, list):
-                            reports = [r for r in all_reports if str(r.get("project_id", "")) == project_id]
-                except Exception:
-                    logger.warning("agent_proxy_failed", endpoint="/reports", exc_info=True)
-            else:
-                reports = await _agent_get(client, f"{agent_base}/reports")
+                agent_params["project_id"] = project_id
+            reports = await _agent_get(client, f"{agent_base}/reports", agent_params)
             items = [transform_report(r) for r in reports]
             total = len(items)
-            paged = items[offset:offset + limit]
-            return paginated_response(paged, total, limit, offset)
+            return paginated_response(items, total, limit, offset)
 
         if method in (POST, PUT, DELETE):
             return JSONResponse({"detail": "Reports CRUD not supported via agent"}, status_code=501)
 
     if path.rstrip("/") == "sources":
         if method == GET:
-            sources = await _agent_get(client, f"{agent_base}/sources")
+            sources = await _agent_get(client, f"{agent_base}/sources", _agent_params(params, limit, offset))
             total = len(sources)
-            paged = sources[offset:offset + limit]
-            return paginated_response(paged, total, limit, offset)
+            return paginated_response(sources, total, limit, offset)
         if method == POST:
             body = await request.json()
             try:
@@ -153,7 +149,7 @@ async def api_v1_handler(request: Request, path: str):
     if path.rstrip("/") == "entities":
         if method == GET:
             try:
-                resp = await client.get(f"{agent_base}/entities", params={"limit": limit} if not params.get("project_id") else params)
+                resp = await client.get(f"{agent_base}/entities", params=_agent_params(params, limit, offset))
                 if resp.status_code == 200:
                     data = resp.json()
                     items = data if isinstance(data, list) else data.get("items", data.get("entities", []))
@@ -179,10 +175,9 @@ async def api_v1_handler(request: Request, path: str):
 
     if path.rstrip("/") == "claims":
         if method == GET:
-            claims = await _agent_get(client, f"{agent_base}/claims", params={"limit": limit})
+            claims = await _agent_get(client, f"{agent_base}/claims", params={"limit": str(limit)})
             total = len(claims)
-            paged = claims[offset:offset + limit]
-            return paginated_response(paged, total, limit, offset)
+            return paginated_response(claims, total, limit, offset)
         return JSONResponse({"detail": "Claims write proxy not supported"}, status_code=501)
 
     if path.startswith("graph/data/"):
