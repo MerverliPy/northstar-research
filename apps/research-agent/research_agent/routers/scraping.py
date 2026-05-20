@@ -5,6 +5,7 @@ from northstar_llm import LLMService
 from northstar_models import ScrapeRequest, ScrapeResponse, SourceCreate, SourceRead
 from northstar_vector import VectorStore
 
+from research_agent.config import settings
 from research_agent.dependencies import get_db, get_llm, get_neo4j, get_scraper, get_vector_store
 from research_agent.services.extraction import run_extraction
 from research_agent.services.scraper import WebScraper
@@ -57,7 +58,7 @@ async def scrape_url(
             db=db,
             neo4j=neo4j,
             vector_store=vector_store,
-            force=False,
+            force=settings.force_graph_extraction,
         )
 
     return ScrapeResponse(

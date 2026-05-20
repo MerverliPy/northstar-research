@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -55,7 +56,7 @@ class TestPromoteToAgent:
             mock_client.__aexit__ = AsyncMock(return_value=None)
             mock_client_cls.return_value = mock_client
 
-            result = await promote_to_agent("http://127.0.0.1:8099", 1, AsyncMock())
+            result = await promote_to_agent("http://127.0.0.1:8099", 1, AsyncMock(), project_id=str(uuid.uuid4()))
             assert result["status"] == "promoted"
             assert result["source_id"] == "new-source-id"
             assert result["error"] is None

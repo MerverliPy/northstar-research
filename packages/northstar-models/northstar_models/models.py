@@ -88,7 +88,7 @@ class Analysis(CommonModel):
     __tablename__ = "analyses"
 
     source_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("sources.id", ondelete="CASCADE"), nullable=True)
-    project_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    project_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), nullable=True)
     analysis_type: Mapped[str]
     content: Mapped[dict[str, Any]] = mapped_column(JSON)
     model_used: Mapped[Optional[str]] = mapped_column(nullable=True)

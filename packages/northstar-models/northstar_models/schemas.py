@@ -253,7 +253,7 @@ class QualityScoreRequest(BaseModel):
 
 class QualityScoreResponse(BaseModel):
     quality_status: QualityStatus
-    score: float
+    score: float = Field(ge=0.0, le=1.0)
     reasoning: str
     model_used: str
 

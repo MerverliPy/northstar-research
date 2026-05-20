@@ -20,13 +20,16 @@ class TestForceGraphExtraction:
         assert "detail" in data
         assert "force" in data["detail"].lower()
 
-    async def test_extraction_returns_200_when_force_true(self, agent_client):
+    async def test_extraction_returns_403_when_force_true_but_server_disabled(self, agent_client):
         sid = uuid.uuid4()
         response = await agent_client.post(
             "/api/v1/extraction/extract",
             json={"source_id": str(sid), "force": True},
         )
-        assert response.status_code == 200
+        assert response.status_code == 403
+        data = response.json()
+        assert "detail" in data
+        assert "disabled" in data["detail"].lower()
 
     async def test_portal_extraction_gate_403(self, portal_client):
         sid = uuid.uuid4()

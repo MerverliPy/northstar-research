@@ -130,15 +130,16 @@ class TestExtractionAPI:
             "/api/v1/extraction/extract",
             json={"source_id": str(sid), "force": True},
         )
-        assert response.status_code == 200
+        assert response.status_code == 403
 
     async def test_extraction_source_not_found(self, agent_client, mock_db):
         mock_db.get_source.return_value = None
         sid = uuid.uuid4()
-        response = await agent_client.post(
-            "/api/v1/extraction/extract",
-            json={"source_id": str(sid), "force": True},
-        )
+        with patch("research_agent.config.settings.force_graph_extraction", True):
+            response = await agent_client.post(
+                "/api/v1/extraction/extract",
+                json={"source_id": str(sid), "force": True},
+            )
         assert response.status_code == 404
 
     async def test_extraction_status(self, agent_client):

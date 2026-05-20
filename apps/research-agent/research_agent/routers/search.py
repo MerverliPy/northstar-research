@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends
 
 from northstar_models import SearchRequest, SearchResult as SearchResultSchema
@@ -29,7 +31,7 @@ async def vector_search(
             content=r.text,
             score=r.score,
             metadata=r.metadata,
-            source_id=r.source_id,
+            source_id=uuid.UUID(r.source_id) if r.source_id else None,
         )
         for r in results
     ]

@@ -19,8 +19,8 @@ DELETE = "DELETE"
 def transform_project(agent_project: dict) -> dict:
     return {
         "id": str(agent_project.get("id", "")),
-        "name": agent_project.get("topic", ""),
-        "description": agent_project.get("topic", "")[:200],
+        "name": agent_project.get("name", ""),
+        "description": agent_project.get("description", "")[:200] if agent_project.get("description") else "",
         "metadata": {"status": agent_project.get("status", "")},
         "created_at": agent_project.get("created_at", ""),
         "updated_at": agent_project.get("created_at", ""),
@@ -31,9 +31,9 @@ def transform_report(agent_report: dict) -> dict:
     return {
         "id": str(agent_report.get("id", agent_report.get("report_id", ""))),
         "project_id": str(agent_report.get("project_id", "")),
-        "title": agent_report.get("title", agent_report.get("topic", "Report")),
-        "content": agent_report.get("content", agent_report.get("summary", "")),
-        "report_type": agent_report.get("report_type", agent_report.get("type", "summary")),
+        "title": agent_report.get("title", "Report"),
+        "content": agent_report.get("summary", agent_report.get("report_data", "")),
+        "report_type": "report",
         "metadata": None,
         "created_at": agent_report.get("created_at", ""),
         "updated_at": agent_report.get("created_at", ""),
@@ -134,12 +134,26 @@ async def api_v1_handler(request: Request, path: str):
             return JSONResponse({"detail": "Reports CRUD not supported via agent"}, status_code=501)
 
     if path.rstrip("/") == "sources":
-        return paginated_response([], 0, limit, offset)
+        if method == GET:
+            sources = await _agent_get(client, f"{agent_base}/sources")
+            total = len(sources)
+            paged = sources[offset:offset + limit]
+            return paginated_response(paged, total, limit, offset)
+        if method == POST:
+            body = await request.json()
+            try:
+                resp = await client.post(f"{agent_base}/sources", json=body)
+                if resp.status_code in (200, 201):
+                    return resp.json()
+            except Exception:
+                logger.warning("agent_proxy_failed", endpoint="/sources", exc_info=True)
+            return JSONResponse({"detail": "Failed to create source"}, status_code=502)
+        return JSONResponse({"detail": "Method not supported"}, status_code=405)
 
     if path.rstrip("/") == "entities":
         if method == GET:
             try:
-                resp = await client.get(f"{agent_base}/knowledge/entities", params={"limit": limit} if not params.get("project_id") else params)
+                resp = await client.get(f"{agent_base}/entities", params={"limit": limit} if not params.get("project_id") else params)
                 if resp.status_code == 200:
                     data = resp.json()
                     items = data if isinstance(data, list) else data.get("items", data.get("entities", []))
@@ -160,11 +174,16 @@ async def api_v1_handler(request: Request, path: str):
                         ]
                         return paginated_response(transformed)
             except Exception:
-                logger.warning("agent_proxy_failed", endpoint="/knowledge/entities", exc_info=True)
+                logger.warning("agent_proxy_failed", endpoint="/entities", exc_info=True)
         return paginated_response([], 0, limit, offset)
 
     if path.rstrip("/") == "claims":
-        return paginated_response([], 0, limit, offset)
+        if method == GET:
+            claims = await _agent_get(client, f"{agent_base}/claims", params={"limit": limit})
+            total = len(claims)
+            paged = claims[offset:offset + limit]
+            return paginated_response(paged, total, limit, offset)
+        return JSONResponse({"detail": "Claims write proxy not supported"}, status_code=501)
 
     if path.startswith("graph/data/"):
         project_id = path.split("/")[-1]

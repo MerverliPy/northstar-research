@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Detect venv, fall back to PATH
-VENV := $(shell which python3 2>/dev/null | xargs dirname 2>/dev/null || echo "/usr/local/bin")
+VENV := $(CURDIR)/.venv/bin
 
 .PHONY: doctor health check-secrets lint tree install install-all test portal-dev portal-build
 

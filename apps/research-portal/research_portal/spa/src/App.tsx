@@ -9,9 +9,12 @@ export default function App() {
 
   return (
     <div className="flex h-full">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-[--color-northstar-accent] focus:text-white focus:no-underline">Skip to main content</a>
       <OfflineBanner />
       <Sidebar />
-      <MainPanel />
+      <main id="main-content" className="flex-1 overflow-auto">
+        <MainPanel />
+      </main>
       <ToastContainer />
     </div>
   )

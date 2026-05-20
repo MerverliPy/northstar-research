@@ -265,6 +265,19 @@ class Neo4jRepository:
             record = await result.single()
             return record.get("deleted", 0) > 0 if record else False
 
+    async def delete_claim_relationship(self, claim_id: uuid.UUID) -> bool:
+        async with self._session() as session:
+            result = await session.run(
+                """
+                MATCH ()-[r:MAKES_CLAIM {claim_id: $claim_id}]-()
+                DELETE r
+                RETURN count(r) AS deleted
+                """,
+                claim_id=str(claim_id),
+            )
+            record = await result.single()
+            return record.get("deleted", 0) > 0 if record else False
+
     async def clear_project_graph(self, project_id: uuid.UUID) -> None:
         async with self._session() as session:
             await session.run(

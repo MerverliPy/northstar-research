@@ -199,6 +199,9 @@ export function Table<T extends Record<string, any>>({
                     ? 'cursor-pointer hover:bg-[#2a2a4a]/30'
                     : 'hover:bg-[#2a2a4a]/10'
                 }`}
+                tabIndex={onRowClick ? 0 : undefined}
+                role={onRowClick ? 'button' : undefined}
+                onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRowClick(item); } } : undefined}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map((col) => (

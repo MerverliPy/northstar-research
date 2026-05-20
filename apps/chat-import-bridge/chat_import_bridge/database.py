@@ -28,3 +28,10 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 async def init_staging_db():
     engine = get_staging_db()
     await init_db(engine)
+
+
+async def close_staging_db():
+    global _engine
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None

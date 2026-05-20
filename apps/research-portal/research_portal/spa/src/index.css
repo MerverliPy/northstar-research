@@ -3,7 +3,7 @@
 /* Light theme tokens (default) */
 :root {
   --color-northstar-dark: #f0f2f5;
-  --color-northstar-accent: #e94560;
+  --color-northstar-accent: #c7304f;
   --color-northstar-surface: #ffffff;
   --color-northstar-border: #d1d5db;
   --color-northstar-text: #1a1a2e;
@@ -14,13 +14,13 @@
   --color-sidebar-hover: #e5e7eb;
   --color-sidebar-text: #6b7280;
   --color-sidebar-active-bg: #fce7f3;
-  --color-sidebar-active-text: #e94560;
+  --color-sidebar-active-text: #c7304f;
 }
 
 /* Dark theme overrides */
 .dark {
   --color-northstar-dark: #1a1a2e;
-  --color-northstar-accent: #e94560;
+  --color-northstar-accent: #c7304f;
   --color-northstar-surface: #16213e;
   --color-northstar-border: #2a2a4a;
   --color-northstar-text: #e0e0e0;
@@ -31,7 +31,7 @@
   --color-sidebar-hover: rgba(42, 42, 74, 0.3);
   --color-sidebar-text: #8888aa;
   --color-sidebar-active-bg: rgba(233, 69, 96, 0.1);
-  --color-sidebar-active-text: #e94560;
+  --color-sidebar-active-text: #c7304f;
 }
 
 @theme {

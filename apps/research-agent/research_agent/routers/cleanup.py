@@ -67,9 +67,6 @@ async def execute_cleanup(
         orphaned_entities = result.scalars().all()
         for e in orphaned_entities:
             orphans.append(f"Entity '{e.name}' ({e.id})")
-            await neo4j.delete_entity_node(e.id)
-            items_to_review.append(f"Deleted entity '{e.name}' ({e.id})")
-            deleted_count += 1
 
         if orphaned_entities:
             ids = [e.id for e in orphaned_entities]
@@ -77,6 +74,11 @@ async def execute_cleanup(
                 delete(Entity).where(Entity.id.in_(ids))
             )
             await session.commit()
+
+            for e in orphaned_entities:
+                await neo4j.delete_entity_node(e.id)
+                items_to_review.append(f"Deleted entity '{e.name}' ({e.id})")
+                deleted_count += 1
 
     suggestions = [
         f"Deleted {deleted_count} orphaned entities",

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from chat_import_bridge.database import init_staging_db
+from chat_import_bridge.database import close_staging_db, init_staging_db
 from chat_import_bridge.routers import export, imports, promotion
 
 
@@ -12,6 +12,7 @@ from chat_import_bridge.routers import export, imports, promotion
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_staging_db()
     yield
+    await close_staging_db()
 
 
 app = FastAPI(

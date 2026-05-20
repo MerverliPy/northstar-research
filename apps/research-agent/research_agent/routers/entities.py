@@ -2,10 +2,10 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from northstar_db import PostgresRepository
+from northstar_db import Neo4jRepository, PostgresRepository
 from northstar_models import EntityCreate, EntityRead
 
-from research_agent.dependencies import get_db
+from research_agent.dependencies import get_db, get_neo4j
 
 router = APIRouter(prefix="/entities", tags=["Entities"])
 
@@ -48,7 +48,9 @@ async def get_entity(
 async def delete_entity(
     entity_id: uuid.UUID,
     db: PostgresRepository = Depends(get_db),
+    neo4j: Neo4jRepository = Depends(get_neo4j),
 ):
     deleted = await db.delete_entity(entity_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Entity not found")
+    await neo4j.delete_entity_node(entity_id)

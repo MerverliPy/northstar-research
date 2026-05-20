@@ -63,7 +63,7 @@ class LLMService:
                     )
                     self._cache.set(prompt, model, response, system_prompt, temperature, max_tokens)
                     return response
-                except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError) as exc:
+                except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError, httpx.HTTPStatusError) as exc:
                     logger.warning(
                         "llm_attempt_failed",
                         model=model,
@@ -182,33 +182,51 @@ class EmbeddingService:
         self._client = httpx.AsyncClient(timeout=httpx.Timeout(60.0))
 
     async def embed(self, text: str) -> list[float]:
-        payload = {
-            "model": self._model,
-            "input": text,
-        }
-        response = await self._client.post(
-            f"{self._ollama_base_url}/api/embed",
-            json=payload,
-        )
-        response.raise_for_status()
-        data = response.json()
-        embeddings = data.get("embeddings", [])
-        if not embeddings:
-            raise LLMError(f"Empty embedding response for model {self._model}")
-        return embeddings[0]
+        last_error: Exception | None = None
+        for attempt in range(3):
+            try:
+                payload = {
+                    "model": self._model,
+                    "input": [text],
+                }
+                response = await self._client.post(
+                    f"{self._ollama_base_url}/api/embed",
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                embeddings = data.get("embeddings", [])
+                if not embeddings:
+                    raise LLMError(f"Empty embedding response for model {self._model}")
+                return embeddings[0]
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError, httpx.HTTPStatusError) as exc:
+                if attempt < 2:
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    last_error = exc
+        raise LLMError(f"Embed failed for model {self._model} after 3 attempts") from last_error
 
     async def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        payload = {
-            "model": self._model,
-            "input": texts,
-        }
-        response = await self._client.post(
-            f"{self._ollama_base_url}/api/embed",
-            json=payload,
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data.get("embeddings", [])
+        last_error: Exception | None = None
+        for attempt in range(3):
+            try:
+                payload = {
+                    "model": self._model,
+                    "input": texts,
+                }
+                response = await self._client.post(
+                    f"{self._ollama_base_url}/api/embed",
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data.get("embeddings", [])
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError, httpx.HTTPStatusError) as exc:
+                if attempt < 2:
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    last_error = exc
+        raise LLMError(f"Embed batch failed for model {self._model} after 3 attempts") from last_error
 
     async def embed_dimension(self) -> int:
         test = await self.embed("test")

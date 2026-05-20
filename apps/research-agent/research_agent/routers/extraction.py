@@ -25,10 +25,10 @@ async def trigger_extraction(
     neo4j: Neo4jRepository = Depends(get_neo4j),
     vector_store: VectorStore = Depends(get_vector_store),
 ):
-    if not req.force and not settings.force_graph_extraction:
+    if not settings.force_graph_extraction:
         raise HTTPException(
             status_code=403,
-            detail="Extraction not allowed without force flag. Set force=true or FORCE_GRAPH_EXTRACTION=true",
+            detail="Extraction is disabled. Set FORCE_GRAPH_EXTRACTION=true to enable.",
         )
 
     source = await db.get_source(req.source_id)

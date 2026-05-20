@@ -47,6 +47,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["project_id"],
             ["projects.id"],
+            ondelete="CASCADE",
         ),
     )
     op.create_table(
@@ -65,6 +66,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["sources.id"],
+            ondelete="CASCADE",
         ),
     )
     op.create_table(
@@ -83,10 +85,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["sources.id"],
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["entity_id"],
             ["entities.id"],
+            ondelete="CASCADE",
         ),
     )
     op.create_table(
@@ -103,6 +107,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["project_id"],
             ["projects.id"],
+            ondelete="CASCADE",
         ),
     )
     op.create_table(
@@ -121,10 +126,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["sources.id"],
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["project_id"],
             ["projects.id"],
+            ondelete="CASCADE",
         ),
     )
     op.create_table(
@@ -144,10 +151,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["sources.id"],
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["project_id"],
             ["projects.id"],
+            ondelete="CASCADE",
         ),
         sa.UniqueConstraint("source_id", "project_id", name="uq_extraction_log_source_project"),
     )

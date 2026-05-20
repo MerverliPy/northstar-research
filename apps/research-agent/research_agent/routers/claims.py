@@ -2,10 +2,10 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from northstar_db import PostgresRepository
+from northstar_db import Neo4jRepository, PostgresRepository
 from northstar_models import ClaimCreate, ClaimRead
 
-from research_agent.dependencies import get_db
+from research_agent.dependencies import get_db, get_neo4j
 
 router = APIRouter(prefix="/claims", tags=["Claims"])
 
@@ -48,7 +48,10 @@ async def get_claim(
 async def delete_claim(
     claim_id: uuid.UUID,
     db: PostgresRepository = Depends(get_db),
+    neo4j: Neo4jRepository = Depends(get_neo4j),
 ):
-    deleted = await db.delete_claim(claim_id)
-    if not deleted:
+    claim = await db.get_claim(claim_id)
+    if claim is None:
         raise HTTPException(status_code=404, detail="Claim not found")
+    await db.delete_claim(claim_id)
+    await neo4j.delete_claim_relationship(claim_id)

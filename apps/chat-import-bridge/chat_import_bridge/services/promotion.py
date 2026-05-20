@@ -20,7 +20,9 @@ async def promote_to_agent(
     if staged.status == "promoted":
         return {"status": "skipped", "source_id": None, "error": "Already promoted"}
 
-    pid = uuid.UUID(project_id) if project_id else uuid.uuid4()
+    if not project_id:
+        return {"status": "failed", "source_id": None, "error": "project_id is required"}
+    pid = uuid.UUID(project_id)
 
     payload = SourceCreate(
         project_id=pid,

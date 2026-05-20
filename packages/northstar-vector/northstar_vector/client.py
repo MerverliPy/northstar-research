@@ -42,6 +42,7 @@ class VectorStore:
             await asyncio.to_thread(
                 self._client.get_or_create_collection,
                 name="default",
+                metadata={"hnsw:space": "cosine"},
             )
         except Exception as exc:
             raise VectorStoreError(

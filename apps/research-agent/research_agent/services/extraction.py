@@ -10,6 +10,8 @@ from northstar_vector import DocumentChunk, VectorStore
 
 logger = structlog.get_logger(__name__)
 
+MIN_CONFIDENCE = 0.3
+
 
 class ExtractedEntity(BaseModel):
     name: str
@@ -91,6 +93,7 @@ async def run_extraction(
                 confidence=e.confidence,
             )
             for e in result.entities
+            if e.confidence is None or e.confidence >= MIN_CONFIDENCE
         ]
 
         created_entities = await db.bulk_create_entities(entity_creates)
@@ -108,6 +111,7 @@ async def run_extraction(
                 confidence=c.confidence,
             )
             for c in result.claims
+            if c.confidence is None or c.confidence >= MIN_CONFIDENCE
         ]
 
         created_claims = await db.bulk_create_claims(claim_creates)

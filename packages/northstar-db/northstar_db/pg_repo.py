@@ -544,6 +544,7 @@ class PostgresRepository:
             ]
             session.add_all(models)
             await session.flush()
+            await session.commit()
             return models
 
     async def bulk_create_claims(
@@ -564,4 +565,5 @@ class PostgresRepository:
             ]
             session.add_all(models)
             await session.flush()
+            await session.commit()
             return models
