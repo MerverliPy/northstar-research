@@ -441,3 +441,51 @@ Then:
 ```text
 @docs-syncer update docs affected by this behavior change and leave unrelated docs untouched.
 ```
+
+<!-- BEGIN GENERATED NORTHSTAR AGENT ADAPTATIONS -->
+
+## Adapted specialist agents
+
+These agents were adapted from the GitHub agent-pack review and narrowed to Northstar-specific workflows. Use the smallest relevant agent; do not invoke all agents for routine work.
+
+### `@llm-extraction-engineer`
+
+Use for local LLM extraction, embeddings, vector search, ChromaDB behavior, quality scoring, structured model output, and Ollama/self-hosted model concerns.
+
+### `@data-pipeline-reviewer`
+
+Use for import, staging, promotion, PostgreSQL canonical persistence, source lineage, derived Neo4j/ChromaDB sync, cleanup, backup/restore, and data-quality invariants.
+
+### `@api-test-engineer`
+
+Use for FastAPI endpoint tests, frontend/backend contract tests, async mocks, safety-gate tests, extraction/cleanup/search/graph/report coverage, and regression test planning.
+
+### `@db-performance-reviewer`
+
+Use for SQLAlchemy async repository performance, Alembic migration performance, indexes, query shape, pagination, Neo4j graph query performance, and unbounded-list risks.
+
+### `@appsec-reviewer`
+
+Use before changes involving scraping, untrusted rendered content, imports/exports, logs, CORS, secrets, public exposure, destructive flags, or safety bypasses.
+
+### `@performance-benchmarker`
+
+Use for safe benchmark design around extraction latency, vector search, graph queries, API latency, portal build/runtime behavior, and large import/export flows.
+
+### `@accessibility-auditor`
+
+Use for React/Vite portal accessibility, keyboard flow, semantics, forms, tables, modals, graphs, mobile usability, PWA affordances, and reduced-motion behavior.
+
+### `@codebase-cartographer`
+
+Use before large or ambiguous tasks to map the smallest relevant files, flows, service boundaries, tests, and recommended follow-up agents.
+
+### `@ops-reliability-reviewer`
+
+Use for Docker Compose, service health, doctor scripts, systemd units, backup/restore, logs, ports, and local-first reliability reviews.
+
+### `/northstar-agent-audit`
+
+Use this command when you want OpenCode to select the smallest relevant subset of adapted agents for a scoped audit.
+
+<!-- END GENERATED NORTHSTAR AGENT ADAPTATIONS -->
